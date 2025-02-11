@@ -1,0 +1,271 @@
+
+Bazaga saqlash
+
+
+BotUser:
+    1) first_name  -> string
+    2) last_name  -> string
+    3) username -> string
+    4) contact -> string
+    5) long -> locatsiya kordinata -> float
+    6) lat  -> locatsiya kordinata -> float
+    7) day_and_night -> bool
+    8) is_active -> bool
+
+
+AdminPanelUser
+    1) first_name  -> string
+    2) last_name  -> string
+    3) username -> string
+    4) password -> string
+    5) status -> admin, moderator -> string
+    6) contact -> string
+    7) day_and_night -> boolean
+    8) is_active -> bool
+
+
+Shop:
+    1) name -> string
+    2) order_group_id -> Integer
+    3) courier_group_id -> integer
+    4) cart_number -> Integer
+    5) lang -> float
+    6) lot -> float
+    7) work_status -> type : (OPEN-ochiq, CLOSE-yopiq) -> string
+    8) photo
+    9) owner_id
+
+IshVaqti:
+    1) open_time -> string
+    2) close_time -> string
+    3) weeks -> array
+    4) shop_id -> integer
+
+
+Filialga tegishli Category
+    1) name -> string
+    2) parent_id -> integer
+    3) shop_id -> integer
+    4) photo -> string
+
+
+Filialga tegishli Product
+
+    1) name_uz -> string
+    2) name_ru -> string
+    3) photo -> file (string)
+    4) shop_id -> integer
+    5) description_uz -> string
+    6) description_uz -> string
+    7) owner_id -> kim tomondan qo'shilganligi havfsizlik uchun -> integer
+    8) category_id: int
+
+Product Tiplari
+    1) product_id
+    2) price : int
+    3) volume: int
+    4) unit : str
+
+Savat
+    1) product_id -> integer
+    2) bot_user_id -> integer
+    3) count -> integer
+    4) shop_id -> integer
+    5) tip_id -> int
+    6) price
+    7) total
+
+
+Buyurtma
+    1) bot_user_id -> integer
+    2) shop_id -> integer
+    3) payment -> type(cash-naqt, terminal-karta) string
+    4) status -> yangi, yeg'ilvotdi, qabul qilindi, yetkazildi, bekor qilindi -> string
+    5) total_sum -> integer
+    6) first_last_name -> string
+    7) contact -> string
+    8) driver_price -> string
+    9) address -> string
+
+Buyurtma mahsulotlari
+    1) product_id
+    2) order_id
+    3) count
+    4) total_sum
+    5) price
+    6) tip_id
+
+Bot:
+    1) Ro'yxatdan o'tish
+    2) Knopka
+        Menu, setting
+            Menu -> web app ochish
+
+            admin uchun ko'rinadigan
+                  settings -> filialni guruxni o'zgartirish yoki kiritish
+
+    Gurux:
+        Buyurtma:
+            Qabul qilish kno'pka
+            Yeg'ildi
+        Yetkazish:
+            Qabul qilish
+            Yetkazildi
+
+
+
+Web app:
+    Filial tanlidi
+    Locatsiya o'zgartirish
+
+    Flilial:
+        Barcha Category:
+            bosgandan keyin unga tegishli bo'lgan mahsulot
+
+        Barcha Mahsulot:
+            bosgandan keyin mahsulot bo'yicha to'liq malumot
+
+        Savatga qo'shish jarayoni:
+            Mahsulotni soni
+            Turi, miqdorini tanlash -> 300G, 1KG
+
+        Buyurtma berish:
+            Buyurtma berish tugmani bosgandan keyin , buyurtma qabul qilindi deb foydalanuvchiga boradi va guruxga
+
+    Qidiruv bo'limi
+        1) Filial bo'yicha
+        2) Category nomi bo'yicha
+        3) mahsulot nomi bo'yicha
+
+
+
+Admin panel sayt:
+    Login -> username , parol
+    Register -> username, parol
+
+    Dashboard -> statistika
+
+    Qidiruv bo'limi
+        1) Filial bo'yicha
+        2) Category nomi bo'yicha
+        3) mahsulot nomi bo'yicha
+        4) User ismi bo'yicha
+
+    Filial qo'shish:
+        Category qo'shish
+        Mahsulot qo'shish
+            Excel orqali yoki yakka
+
+Xafsizlik Jwt token
+
+API
+    BotUser:
+        1) Create - yaratish path (bot-users)
+            params (operator_id: int)
+
+        2) Update - o'zgartirish path (bot-users/profile)
+            params (user_id: int)
+            body (first_name: [str]
+                    last_name: [str]
+                    username: [str]
+                    is_active: bool
+                    contact: [str]
+                    long: [float]
+                    lat: [float] )
+
+        3) Delete - o'chirish
+            params (operator_id, user_id)
+
+        4) Get - ko'rish path (bot-users/profile)
+            params (user_id: int)
+
+        5) get all path (bot-users)
+
+
+    PanelUser:
+        1) Create - yaratish -> path (panel-users)
+                params (operator_id: int)
+                body  (first_name: str
+                    last_name: str
+                    username: str
+                    contact: str
+                    password: str
+                    is_active: bool
+                    status: "moderator"
+                    day_and_night: False)
+
+        2) Update - o'zgartirish path(panel-users/profile)
+                params (user_id: int)
+                body (first_name: str
+                last_name: str
+                username: str
+                password: str
+                contact: str
+                is_active: bool)
+        3) Update status
+            params (operator_id: int -> admin panel user ,user_id: int)
+            body (status in [admin, moderator])
+
+        3) Delete - o'chirish
+            params (operator_id: int -> admin panel user ,user_id: int)
+
+        4) Get profile - ko'rish path (panel-users/profile)
+            params (user_id: int)
+
+        5) Get all - path (panel-users)
+
+        6) Login - path (panel-users/login)
+            params (username, parol)
+
+        7) Register ??
+
+    Filial:
+        1) Create - yaratish path (shop)
+        2) Update - o'zgartirish path (shop/detail)
+        3) Delete - o'chirish   (shop)
+        4) Get - ko'rish (shop/detail)
+
+    Category:
+        1) Create - yaratish path (shop-categories)
+        2) Update - o'zgartirish path (shop-categories/detail)
+        3) Delete - o'chirish path (shop-categories)
+        4) Get all - ko'rish path (shop-categories)
+        5) from_shop - path (shop-categories/from_shop)
+
+    Mahsulot:
+        1) Create - yaratish path (shop-products)
+        2) Update - o'zgartirish path (shop-products/detail)
+        3) Delete - o'chirish path (shop-products)
+        4) Get all - ko'rish path (shop-products)
+        5) from_shop - path (shop-products/from_shop)
+        5) Search - qidiruv path (shop-products/search)
+
+    Savat:
+        1) Create - yaratish
+           params (client_id: int),
+           body (product_id: int = Form(),
+                 tip_id: int = Form(),
+                             shop_id: int = Form(),
+                             count: int = Form())
+                 agar oldin shu mahsulot tanlagan bo'lsa ustiga saqlab qo'yadi yoki usha mahsulot
+                 lekin gram tipi boshqa bolsa yangi yaratadi
+
+        2) Update - o'zgartirish
+            o'zgartirish uchun -> cart_id : integer, count: integer, (minus va plus parametrga berilgan qaysi
+             biri kelsa usha vazifani bajaradi)
+        3) Delete - o'chirish
+            params : cart_id -> integer
+        4) Get - ko'rish
+
+
+    Buyurtma:
+        1) Create - yaratish
+        2) Update - o'zgartirish
+        3) Get - ko'rish
+        4) Search - qidiruv
+
+
+tasklar
+1) Buyurtma bekor qilish
+2) ruscha o'zbekcha
+3)
