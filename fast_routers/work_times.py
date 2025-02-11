@@ -54,9 +54,9 @@ class UpdateWork(BaseModel):
 @work_router.patch(path='', name="Update Work")
 async def list_category_shop(user_id: int, shop_id: int, work_id: int, items: Annotated[UpdateWork, Form()]):
     work = await WorkTimes.get(work_id)
-    user = await AdminPanelUser.get(user_id)
+    user: AdminPanelUser = await AdminPanelUser.get(user_id)
     shop = await Shop.get(shop_id)
-    if user.status.value in ["moderator", "admin", "superuser"] or user_id == shop.owner_id:
+    if user.status in ["moderator", "admin", "superuser"] or user_id == shop.owner_id:
         if work:
             update_data = {k: v for k, v in items.dict().items() if v is not None}
             await WorkTimes.update(work_id, **update_data)

@@ -71,12 +71,12 @@ async def list_category_shop(operator_id: int,
                              category_id: int = Form(default=None),
                              shop_id: int = Form(),
                              photo: UploadFile = File(default=None), ):
-    user = await AdminPanelUser.get(operator_id)
+    user: AdminPanelUser = await AdminPanelUser.get(operator_id)
     category = await ShopCategory.get_from_shop(shop_id, category_id)
     shop = await Shop.get(shop_id)
     if user and shop:
         if category:
-            if user.status.value in ['moderator', "admin", "superuser"] or user.id == shop.owner_id:
+            if user.status in ['moderator', "admin", "superuser"] or user.id == shop.owner_id:
                 product = await ShopProduct.create(
                     name_uz=name_uz,
                     name_ru=name_ru,
@@ -118,7 +118,7 @@ async def list_category_shop(operator_id: int,
                              category_id: int = Form(default=None),
                              photo: UploadFile = File(default=None),
                              ):
-    user = await AdminPanelUser.get(operator_id)
+    user: AdminPanelUser = await AdminPanelUser.get(operator_id)
     product = await ShopProduct.get(shop_product_id)
     if photo:
         if not photo.content_type.startswith("image/"):
@@ -130,7 +130,7 @@ async def list_category_shop(operator_id: int,
                        if
                        v is not None}
 
-        if user.status.value in ['moderator', "admin", "superuser"] or user.id == product.owner_id:
+        if user.status in ['moderator', "admin", "superuser"] or user.id == product.owner_id:
             await ShopProduct.update(shop_product_id, **update_data)
             return {"ok": True}
         else:
@@ -141,10 +141,10 @@ async def list_category_shop(operator_id: int,
 
 @shop_product_router.delete(path='', name="Delete Shop Products")
 async def list_category_shop(operator_id: int, shop_product_id: int):
-    user = await AdminPanelUser.get(operator_id)
+    user: AdminPanelUser = await AdminPanelUser.get(operator_id)
     product = await ShopProduct.get(shop_product_id)
     if user and product:
-        if user.status.value in ['moderator', "admin", "superuser"] or user.id == product.owner_id:
+        if user.status in ['moderator', "admin", "superuser"] or user.id == product.owner_id:
             await ShopProduct.delete(shop_product_id)
             return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
         else:
@@ -183,11 +183,11 @@ async def list_category_shop(operator_id: int,
                              price: int = Form(),
                              volume: int = Form(),
                              unit: str = Form()):
-    user = await AdminPanelUser.get(operator_id)
+    user: AdminPanelUser = await AdminPanelUser.get(operator_id)
     product = await ShopCategory.get(product_id)
     if user:
         if product:
-            if user.status.value in ['moderator', "admin", "superuser"]:
+            if user.status in ['moderator', "admin", "superuser"]:
                 tip = await ProductTip.create(
                     product_id=product_id,
                     price=price,
@@ -214,11 +214,11 @@ class UpdateTips(BaseModel):
 # Update Shop
 @shop_product_router.patch(path='/tips/detail', name="Update Product Tips")
 async def list_category_shop(operator_id: int, product_tip_id: int, items: Annotated[UpdateTips, Form()]):
-    user = await AdminPanelUser.get(operator_id)
+    user: AdminPanelUser = await AdminPanelUser.get(operator_id)
     tip = await ProductTip.get(product_tip_id)
     if user and tip:
         update_data = {k: v for k, v in items.dict().items() if v is not None}
-        if user.status.value in ['moderator', "admin", "superuser"]:
+        if user.status in ['moderator', "admin", "superuser"]:
             await ProductTip.update(product_tip_id, **update_data)
             return {"ok": True}
         else:
@@ -229,10 +229,10 @@ async def list_category_shop(operator_id: int, product_tip_id: int, items: Annot
 
 @shop_product_router.delete(path='/tips', name="Delete Product tip")
 async def list_category_shop(operator_id: int, product_tip_id: int):
-    user = await AdminPanelUser.get(operator_id)
+    user: AdminPanelUser = await AdminPanelUser.get(operator_id)
     tip = await ProductTip.get(product_tip_id)
     if user and tip:
-        if user.status.value in ['moderator', "admin", "superuser"]:
+        if user.status in ['moderator', "admin", "superuser"]:
             await ProductTip.delete(tip)
             return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
         else:

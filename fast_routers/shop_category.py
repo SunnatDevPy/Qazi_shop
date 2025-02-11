@@ -41,10 +41,10 @@ async def list_category_shop(seller_id: int,
                              parent_id: int = Form(default=None),
                              photo: UploadFile = File()
                              ):
-    seller = await AdminPanelUser.get(seller_id)
+    seller: AdminPanelUser = await AdminPanelUser.get(seller_id)
     shop = await Shop.get(shop_id)
     if seller and shop:
-        if seller.id == shop.owner_id or seller.status.value in ['moderator', "admin", "superuser"]:
+        if seller.id == shop.owner_id or seller.status in ['moderator', "admin", "superuser"]:
             if parent_id == 0:
                 parent_id = None
             category = await ShopCategory.create(name=name, shop_id=shop_id, parent_id=parent_id, photo=photo)
@@ -62,12 +62,12 @@ async def list_category_shop(operator_id: int,
                              name: str = Form(default=None),
                              parent_id: int = Form(default=None),
                              photo: UploadFile = File(default=None)):
-    user = await AdminPanelUser.get(operator_id)
+    user: AdminPanelUser = await AdminPanelUser.get(operator_id)
     if user:
         update_data = {k: v for k, v in
                        {"name": name, "parent_id": parent_id, "photo": photo}.items() if
                        v is not None}
-        if user.status.value in ['moderator', "admin", "superuser"]:
+        if user.status in ['moderator', "admin", "superuser"]:
             shop = await ShopCategory.get(category_id)
             if shop:
                 await ShopCategory.update(category_id, **update_data)
@@ -82,9 +82,9 @@ async def list_category_shop(operator_id: int,
 
 @shop_category_router.delete(path='', name="Delete Category")
 async def list_category_shop(category_id: int, operator_id: int):
-    user = await AdminPanelUser.get(operator_id)
+    user: AdminPanelUser = await AdminPanelUser.get(operator_id)
     if user:
-        if user.status.value in ['moderator', "admin", "superuser"]:
+        if user.status in ['moderator', "admin", "superuser"]:
             category = await ShopCategory.get(category_id)
             if category:
                 await ShopCategory.delete(category_id)

@@ -30,9 +30,9 @@ class UserList(BaseModel):
 
 @bot_user_router.post("", name="Create Bot User")
 async def user_add(operator_id: int, user_create: Annotated[UserAdd, Form()]):
-    admin_user = await AdminPanelUser.get(operator_id)
+    admin_user: AdminPanelUser = await AdminPanelUser.get(operator_id)
     if admin_user:
-        if admin_user.status.value in ['moderator', "admin"]:
+        if admin_user.status in ['moderator', "admin"]:
             result = await BotUser.create(**user_create.dict())
             return {'ok': True, "user": result}
         else:

@@ -57,9 +57,9 @@ async def list_category_shop(owner_id: int,
                              order_group_id: int = Form(default=None),
                              cart_number: int = Form(default=None),
                              photo: UploadFile = File(default=None)):
-    user = await AdminPanelUser.get(owner_id)
+    user: AdminPanelUser = await AdminPanelUser.get(owner_id)
     if user:
-        if user.status.value in ['moderator', "admin", "superuser"]:
+        if user.status in ['moderator', "admin", "superuser"]:
             shop = await Shop.create(owner_id=owner_id, name=name, lat=lat, long=long,
                                      photo=photo, work_status='CLOSE',
                                      order_group_id=order_group_id, cart_number=cart_number)
@@ -82,8 +82,8 @@ async def list_category_shop(operator_id: int,
                              work_status: str = Form(default=None),
                              photo: UploadFile = File(default=None)
                              ):
-    user = await AdminPanelUser.get(operator_id)
-    shop = await Shop.get(shop_id)
+    user: AdminPanelUser = await AdminPanelUser.get(operator_id)
+    shop: Shop = await Shop.get(shop_id)
     if user and shop:
         if photo:
             if not photo.content_type.startswith("image/"):
@@ -95,7 +95,7 @@ async def list_category_shop(operator_id: int,
             "order_group_id": order_group_id,
             "work_status": work_status,
             "cart_number": cart_number}.items() if v is not None}
-        if user.status.value in ['moderator', "admin", "superuser"] or user.id == shop.owner_id:
+        if user.status in ['moderator', "admin", "superuser"] or user.id == shop.owner_id:
             await Shop.update(shop_id, **update_data)
             return {"ok": True, "shop": shop}
         else:
@@ -106,10 +106,10 @@ async def list_category_shop(operator_id: int,
 
 @shop_router.delete(path='', name="Delete Shop")
 async def list_category_shop(operator_id: int, shop_id: int):
-    user = await AdminPanelUser.get(operator_id)
-    shop = await Shop.get(shop_id)
+    user: AdminPanelUser = await AdminPanelUser.get(operator_id)
+    shop: Shop = await Shop.get(shop_id)
     if user and shop:
-        if user.status.value in ["moderator", "admin", "superuser"]:
+        if user.status in ["moderator", "admin", "superuser"]:
             await Shop.delete(shop)
             return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
         else:
