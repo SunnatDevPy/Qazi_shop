@@ -1,0 +1,139 @@
+from typing import Annotated, Optional
+
+from fastapi import APIRouter, HTTPException, Form
+from pydantic import BaseModel
+
+from models import AdminPanelUser
+
+admin_user_router = APIRouter(prefix='/panel-users', tags=['Panel User'])
+
+
+class UserAdd(BaseModel):
+    id: int
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    username: Optional[str] = None
+    contact: Optional[str] = None
+    password: Optional[str] = None
+    is_active: Optional[bool] = False
+    status: Optional[str] = "moderator"
+    day_and_night: Optional[bool] = False
+
+
+class UserList(BaseModel):
+    id: Optional[int] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    username: Optional[str] = None
+    contact: Optional[str] = None
+    is_active: Optional[bool] = False
+    status: Optional[str] = "moderator"
+    day_and_night: Optional[bool] = False
+
+
+@admin_user_router.post("", name="Create Panel User")
+async def user_add(operator_id: int, user_create: Annotated[UserAdd, Form()]):
+    try:
+        user = await AdminPanelUser.create(**user_create.dict())
+        return {'ok': True, "user": user}
+    except:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+
+@admin_user_router.get('', name="List Panel User")
+async def user_list() -> list[UserList]:
+    users = await AdminPanelUser.all()
+    return users
+
+
+class UserUpdate(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    username: Optional[str] = None
+    password: Optional[str] = None
+    contact: Optional[str] = None
+    is_active: Optional[bool] = None
+
+
+@admin_user_router.get("/profile", name="Detail Panel User")
+async def user_detail(user_id: int):
+    user = await AdminPanelUser.get(user_id)
+    if user:
+        return user
+    else:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+
+@admin_user_router.patch("/profile", name="Update User")
+async def user_patch_update(user_id: int, items: Annotated[UserUpdate, Form()]):
+    user = await AdminPanelUser.get(user_id)
+    if user and user_id:
+        update_data = {k: v for k, v in items.dict().items() if v is not None}
+        if update_data:
+            await AdminPanelUser.update(user.id, **update_data)
+            return {"ok": True, "data": update_data}
+        else:
+            return {"ok": False, "message": "Nothing to update"}
+    else:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+
+@admin_user_router.patch("/status", name="Update Status")
+async def user_add(operator_id: int, user_id: int, status: str = Form()):
+    operator = await AdminPanelUser.get(operator_id)
+    user = await AdminPanelUser.get(user_id)
+    if operator:
+        if operator.status.value == "admin":
+            if status == 'string' or status == '':
+                status = None
+            await AdminPanelUser.update(user.id, status=status)
+            return {"ok": True, "user": user}
+        else:
+            raise HTTPException(status_code=404, detail="Bu userda xuquq yo'q")
+    else:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+
+@admin_user_router.delete("/")
+async def user_delete(operator_id: int, user_id: int):
+    user = await AdminPanelUser.get(operator_id)
+    if user:
+        if user.status.value in ["admin", "superuser"]:
+            await AdminPanelUser.delete(user_id)
+            return {"ok": True, 'id': user_id}
+        else:
+            raise HTTPException(status_code=404, detail="Bu userda xuquq yo'q")
+    else:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+
+class UserLogin(BaseModel):
+    username: Optional[str] = None
+    password: Optional[str] = None
+
+
+@admin_user_router.post(path='/login', name="Login")
+async def login(items: Annotated[UserLogin, Form()]):
+    user = await AdminPanelUser.get_from_username_and_password(items.password, items.username)
+    if user:
+        return {"user": user}
+    else:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+
+class Register(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    username: Optional[str] = None
+    contact: Optional[str] = None
+    password: Optional[str] = None
+
+
+@admin_user_router.post(path='/register', name="Register")
+async def register(items: Annotated[Register, Form()]):
+    user = await AdminPanelUser.get_from_username(items.username)
+    if user is not None:
+        user = await AdminPanelUser.create(**items.dict(), status="moderator", day_and_night=False, is_active=False)
+        return {"user": user}
+    else:
+        raise HTTPException(status_code=404, detail="Bunday username bor")
