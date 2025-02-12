@@ -12,7 +12,8 @@ shop_category_router = APIRouter(prefix='/shop-categories', tags=['Shop Categori
 
 class ListCategories(BaseModel):
     id: int
-    name: str
+    name_uz: str
+    name_ru: str
     shop_id: int
     parent_id: Optional[int] = None
     photo: str
@@ -37,7 +38,8 @@ async def list_category_shop(shop_id: int):
 @shop_category_router.post(path='', name="Create Category")
 async def list_category_shop(seller_id: int,
                              shop_id: int = Form(),
-                             name: str = Form(),
+                             name_uz: str = Form(),
+                             name_ru: str = Form(),
                              parent_id: int = Form(default=None),
                              photo: UploadFile = File()
                              ):
@@ -47,7 +49,8 @@ async def list_category_shop(seller_id: int,
         if seller.id == shop.owner_id or seller.status in ['moderator', "admin", "superuser"]:
             if parent_id == 0:
                 parent_id = None
-            category = await ShopCategory.create(name=name, shop_id=shop_id, parent_id=parent_id, photo=photo)
+            category = await ShopCategory.create(name_uz=name_uz, name_ru=name_ru, shop_id=shop_id, parent_id=parent_id,
+                                                 photo=photo)
             return {"ok": True, "data": category}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
@@ -59,13 +62,14 @@ async def list_category_shop(seller_id: int,
 @shop_category_router.patch(path='/detail', name="Update Category")
 async def list_category_shop(operator_id: int,
                              category_id: int,
-                             name: str = Form(default=None),
+                             name_uz: str = Form(),
+                             name_ru: str = Form(),
                              parent_id: int = Form(default=None),
                              photo: UploadFile = File(default=None)):
     user: AdminPanelUser = await AdminPanelUser.get(operator_id)
     if user:
         update_data = {k: v for k, v in
-                       {"name": name, "parent_id": parent_id, "photo": photo}.items() if
+                       {"name_uz": name_uz, "name_ru": name_ru, "parent_id": parent_id, "photo": photo}.items() if
                        v is not None}
         if user.status in ['moderator', "admin", "superuser"]:
             shop = await ShopCategory.get(category_id)

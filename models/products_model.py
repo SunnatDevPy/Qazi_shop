@@ -8,7 +8,8 @@ from models.database import BaseModel, db
 
 
 class ShopCategory(BaseModel):
-    name: Mapped[str] = mapped_column(VARCHAR(255))
+    name_uz: Mapped[str] = mapped_column(VARCHAR(255))
+    name_ru: Mapped[str] = mapped_column(VARCHAR(255))
     shop_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shops.id', ondelete='CASCADE'),
                                          nullable=True)
     parent_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shop_categories.id', ondelete='CASCADE'),
