@@ -16,11 +16,10 @@ class ListCategories(BaseModel):
     name_ru: Optional[str] = None
     shop_id: int
     parent_id: Optional[int] = None
-    photo: str
 
 
 @shop_category_router.get(path='', name="Categories")
-async def list_category_shop() -> list[ListCategories]:
+async def list_category_shop():
     categories = await ShopCategory.all()
     return categories
 

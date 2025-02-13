@@ -73,7 +73,7 @@ async def list_category_shop(shop_id: int):
 
 @shop_router.post(path='', name="Create Shop")
 async def list_category_shop(owner_id: int,
-                             name_uz: str = Form(default=None),
+                             name_uz: str = Form(None),
                              name_ru: str = Form(None),
                              district_uz: str = Form(None),
                              district_ru: str = Form(None),
