@@ -14,7 +14,8 @@ class Shop(BaseModel):
         OPEN = 'ochiq'
         CLOSE = 'yopiq'
 
-    name: Mapped[str] = mapped_column(VARCHAR(255))
+    name_uz: Mapped[str] = mapped_column(VARCHAR(255))
+    name_ru: Mapped[str] = mapped_column(VARCHAR(255))
     owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('admin_panel_users.id', ondelete='CASCADE'),
                                           nullable=True)
     work_status: Mapped[str] = mapped_column(SqlEnum(WorkTime), nullable=True)
