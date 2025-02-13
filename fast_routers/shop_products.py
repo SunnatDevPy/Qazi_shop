@@ -70,6 +70,9 @@ async def list_category_shop(operator_id: int,
                              description_ru: str = Form(),
                              category_id: int = Form(default=None),
                              shop_id: int = Form(),
+                             price: int = Form(None),
+                             volume: int = Form(None),
+                             unit: str = Form(None),
                              photo: UploadFile = File(default=None), ):
     user: AdminPanelUser = await AdminPanelUser.get(operator_id)
     category = await ShopCategory.get_from_shop(shop_id, category_id)
@@ -86,6 +89,10 @@ async def list_category_shop(operator_id: int,
                     description_ru=description_ru,
                     photo=photo,
                     shop_id=shop_id,
+                    price=price,
+                    volume=volume,
+                    unit=unit,
+                    is_active=True
                 )
                 return {"ok": True, "id": product.id}
 
@@ -116,6 +123,10 @@ async def list_category_shop(operator_id: int,
                              description_uz: str = Form(),
                              description_ru: str = Form(),
                              category_id: int = Form(default=None),
+                             is_active: bool = Form(None),
+                             price: int = Form(None),
+                             volume: int = Form(None),
+                             unit: str = Form(None),
                              photo: UploadFile = File(default=None),
                              ):
     user: AdminPanelUser = await AdminPanelUser.get(operator_id)
@@ -126,7 +137,10 @@ async def list_category_shop(operator_id: int,
     if user and product:
         update_data = {k: v for k, v in
                        {"category_id": category_id, "name_uz": name_uz, "photo": photo,
-                        "name_ru": name_ru, "description_uz": description_uz, "description_ru": description_ru}.items()
+                        "name_ru": name_ru, "description_uz": description_uz, "description_ru": description_ru,
+                        "is_active": is_active, "price": price,
+                        "volume": volume,
+                        "unit": unit, }.items()
                        if
                        v is not None}
 

@@ -81,6 +81,7 @@ async def list_category_shop(owner_id: int,
                              address_ru: str = Form(None),
                              lat: float = Form(None),
                              long: float = Form(None),
+                             is_active: bool = Form(None),
                              order_group_id: int = Form(None),
                              cart_number: int = Form(None),
                              photo: UploadFile = File(None)
@@ -94,7 +95,7 @@ async def list_category_shop(owner_id: int,
                                      address_uz=address_uz,
                                      address_ru=address_ru,
                                      district_ru=district_ru, lat=lat, long=long,
-                                     photo=photo, work_status='CLOSE',
+                                     photo=photo, work_status='CLOSE', is_active=is_active,
                                      order_group_id=order_group_id, cart_number=cart_number)
             return {"ok": True, "shop_id": shop.id}
         else:
@@ -118,6 +119,7 @@ async def list_category_shop(operator_id: int,
                              long: float = Form(None),
                              order_group_id: int = Form(None),
                              cart_number: int = Form(None),
+                             is_active: bool = Form(None),
                              photo: UploadFile = File(None)
                              ):
     user: AdminPanelUser = await AdminPanelUser.get(operator_id)
@@ -135,6 +137,7 @@ async def list_category_shop(operator_id: int,
             "address_ru": address_ru,
             "lat": lat,
             "long": long,
+            "is_active": is_active,
             "order_group_id": order_group_id,
             "work_status": work_status,
             "cart_number": cart_number}.items() if v is not None}

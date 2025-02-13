@@ -16,6 +16,7 @@ class ListCategories(BaseModel):
     name_ru: Optional[str] = None
     shop_id: int
     parent_id: Optional[int] = None
+    is_active: Optional[bool] = None
 
 
 @shop_category_router.get(path='', name="Categories")
@@ -49,7 +50,7 @@ async def list_category_shop(seller_id: int,
             if parent_id == 0:
                 parent_id = None
             category = await ShopCategory.create(name_uz=name_uz, name_ru=name_ru, shop_id=shop_id, parent_id=parent_id,
-                                                 photo=photo)
+                                                 photo=photo, is_active=True)
             return {"ok": True, "data": category}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
@@ -64,11 +65,13 @@ async def list_category_shop(operator_id: int,
                              name_uz: str = Form(),
                              name_ru: str = Form(),
                              parent_id: int = Form(default=None),
+                             is_active: bool = Form(default=None),
                              photo: UploadFile = File(default=None)):
     user: AdminPanelUser = await AdminPanelUser.get(operator_id)
     if user:
         update_data = {k: v for k, v in
-                       {"name_uz": name_uz, "name_ru": name_ru, "parent_id": parent_id, "photo": photo}.items() if
+                       {"name_uz": name_uz, "name_ru": name_ru, "parent_id": parent_id, "is_active": bool,
+                        "photo": photo}.items() if
                        v is not None}
         if user.status in ['moderator', "admin", "superuser"]:
             shop = await ShopCategory.get(category_id)
