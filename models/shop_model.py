@@ -28,7 +28,7 @@ class Shop(BaseModel):
     order_group_id: Mapped[int] = mapped_column(BigInteger, nullable=True)
     cart_number: Mapped[int] = mapped_column(BigInteger, nullable=True)
     photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/')), nullable=True)
-
+    is_active: Mapped[bool]
 
     @classmethod
     async def get_shops_from_user(cls, id_):

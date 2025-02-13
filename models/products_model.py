@@ -15,6 +15,7 @@ class ShopCategory(BaseModel):
     parent_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shop_categories.id', ondelete='CASCADE'),
                                            nullable=True)
     photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/')), nullable=True)
+    is_active: Mapped[bool]
 
     @classmethod
     async def get_shop_categories(cls, id_):
@@ -36,6 +37,10 @@ class ShopProduct(BaseModel):
     category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(ShopCategory.id, ondelete='CASCADE'))
     photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/')), nullable=True)
     shop_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shops.id', ondelete='CASCADE'), nullable=True)
+    is_active: Mapped[bool]
+    price: Mapped[int] = mapped_column(BigInteger)
+    volume: Mapped[int]
+    unit: Mapped[str]
 
     @classmethod
     async def get_products_category(cls, category_id):
