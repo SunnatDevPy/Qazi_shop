@@ -114,3 +114,17 @@ async def detail_order(order: Order):
 <b>Yo'l kira narxi</b>: {order.driver_price}
 <b>Umumiy summa</b>: {order.total_sum}
     """
+
+
+async def all_data():
+    shops = await Shop.all()
+    shop = []
+    for i in shops:
+        product = []
+        categories: list[ShopCategory] = await ShopCategory.get_shop_categories(i.id)
+        for j in categories:
+            j.products = await ShopProduct.get_products_category(j.id)
+            product.append(j)
+        i.category = product
+        shop.append(i)
+    return shop

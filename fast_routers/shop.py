@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from starlette import status
 
 from models import AdminPanelUser, Shop, WorkTimes
+from utils.details import all_data
 
 shop_router = APIRouter(prefix='/shop', tags=['Shop'])
 
@@ -70,6 +71,9 @@ async def list_category_shop(shop_id: int):
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
+@shop_router.get(path='/all', name="Get Shop")
+async def list_category_shop():
+    return await all_data()
 
 @shop_router.post(path='', name="Create Shop")
 async def list_category_shop(owner_id: int,
