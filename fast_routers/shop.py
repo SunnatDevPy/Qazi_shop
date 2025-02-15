@@ -2,7 +2,8 @@ from typing import Optional, List
 
 from fastapi import APIRouter, File, UploadFile, Form
 from fastapi import Response
-from pydantic import BaseModel
+from pydantic import BaseModel, json
+from sqlalchemy import JSON
 from starlette import status
 
 from models import AdminPanelUser, Shop, WorkTimes
@@ -16,7 +17,7 @@ class WorkModel(BaseModel):
     shop_id: int
     open_time: str
     close_time: str
-    weeks: dict
+    weeks: json
 
 
 class ListShopsModel(BaseModel):
