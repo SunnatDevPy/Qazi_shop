@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import APIRouter, File, UploadFile, Form
 from fastapi import Response
@@ -11,10 +11,19 @@ from utils.details import all_data
 shop_router = APIRouter(prefix='/shop', tags=['Shop'])
 
 
+class WorkModel(BaseModel):
+    id: int
+    shop_id: int
+    open_time: str
+    close_time: str
+    weeks: dict
+
+
 class ListShopsModel(BaseModel):
     id: Optional[int]
     owner_id: Optional[int]
-    name: Optional[str]
+    name_uz: Optional[str]
+    name_ru: Optional[str]
     work_status: Optional[str]
     lat: Optional[float]
     long: Optional[float]
@@ -25,6 +34,8 @@ class ListShopsModel(BaseModel):
     order_group_id: Optional[int] = None
     cart_number: Optional[str] = None
     photo: Optional[str] = None
+    is_active: bool
+    work: Optional[List[WorkModel]] = None
 
 
 class UpdateShopsModel(BaseModel):
@@ -58,9 +69,8 @@ class CreateShopsModel(BaseModel):
 
 
 @shop_router.get(path='', name="Shops")
-async def list_category_shop():
-    shops = await Shop.all()
-    return {"shops": shops, "work": await WorkTimes.all()}
+async def list_category_shop() -> list[ListShopsModel]:
+    return await Shop.all()
 
 
 @shop_router.get(path='/detail', name="Get Shop")
@@ -71,9 +81,11 @@ async def list_category_shop(shop_id: int):
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
+
 @shop_router.get(path='/all', name="Get Shop")
 async def list_category_shop():
     return await all_data()
+
 
 @shop_router.post(path='', name="Create Shop")
 async def list_category_shop(owner_id: int,
