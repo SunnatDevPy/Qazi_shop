@@ -35,7 +35,7 @@ class ListShopsModel(BaseModel):
     order_group_id: Optional[int] = None
     cart_number: Optional[int] = None
     photo: Optional[str] = None
-    is_active: bool
+    is_active: Optional[bool] = None
     work: Optional[List[WorkModel]] = None
 
 
