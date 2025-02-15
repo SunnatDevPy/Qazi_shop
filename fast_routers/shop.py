@@ -33,7 +33,7 @@ class ListShopsModel(BaseModel):
     address_uz: Optional[str] = None
     address_ru: Optional[str] = None
     order_group_id: Optional[int] = None
-    cart_number: Optional[str] = None
+    cart_number: Optional[int] = None
     photo: Optional[str] = None
     is_active: bool
     work: Optional[List[WorkModel]] = None
