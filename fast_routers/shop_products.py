@@ -59,7 +59,7 @@ class ProductList(BaseModel):
     is_active: bool
     price: int
     volume: int
-    unit: int
+    unit: str
     tips: Optional[List[ProductTipSchema]] = None  # Prevent recursion
 
     class Config:
