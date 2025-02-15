@@ -45,7 +45,7 @@ def menu(user_id, admin=False):
     ikb = InlineKeyboardBuilder()
     ikb.add(*[InlineKeyboardButton(text="🛒QAZI BOT🛒",
                                    web_app=WebAppInfo(
-                                       url=f'https://www.youtube.com/'))])
+                                       url=f'http://oka-uz.uz/#/{user_id}'))])
     if admin:
         ikb.add(*[InlineKeyboardButton(text="⚙️Settings⚙️", callback_data='game_settings')])
     ikb.adjust(1, 2)
