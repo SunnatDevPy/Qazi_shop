@@ -17,7 +17,7 @@ class WorkModel(BaseModel):
     shop_id: int
     open_time: str
     close_time: str
-    weeks: json
+    weeks: list
 
 
 class ListShopsModel(BaseModel):
