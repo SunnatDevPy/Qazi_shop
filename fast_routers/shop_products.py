@@ -1,4 +1,4 @@
-from typing import Optional, Annotated
+from typing import Optional, Annotated, List
 
 from fastapi import APIRouter, File, UploadFile, Form
 from fastapi import Response
@@ -39,11 +39,37 @@ shop_product_router = APIRouter(prefix='/shop-products', tags=['Shop Products'])
 #     }
 #     return templates.TemplateResponse(request, 'apps/products/product-list.html', context)
 
+class ProductTipSchema(BaseModel):
+    price: int
+    volume: int
+    unit: str
+    product_id: int
+
+
+class ProductList(BaseModel):
+    id: int
+    name_uz: str
+    name_ru: str
+    description_uz: str
+    description_ru: str
+    owner_id: int
+    category_id: int
+    photo: str
+    shop_id: int
+    is_active: bool
+    price: int
+    volume: int
+    unit: int
+    tips: Optional[List[ProductTipSchema]] = None  # Prevent recursion
+
+    class Config:
+        from_attributes = True
+        exclude_unset = True
+
 
 @shop_product_router.get(path='', name="Get All Products")
-async def list_category_shop():
-    products = await ShopProduct.all()
-    return {"products": products}
+async def list_category_shop() -> list[ProductList]:
+    return await ShopProduct.all()
 
 
 @shop_product_router.get(path='/detail', name="Get Product")
