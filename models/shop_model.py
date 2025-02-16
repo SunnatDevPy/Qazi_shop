@@ -18,19 +18,18 @@ class Shop(BaseModel):
     name_ru: Mapped[str] = mapped_column(VARCHAR(255))
     owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('admin_panel_users.id', ondelete='CASCADE'),
                                           nullable=True)
-    work_status: Mapped[str] = mapped_column(SqlEnum(WorkTime), nullable=True)
-    lat: Mapped[float] = mapped_column(nullable=True)
-    long: Mapped[float] = mapped_column(nullable=True)
-    district_uz: Mapped[str] = mapped_column(nullable=True)
-    district_ru: Mapped[str] = mapped_column(nullable=True)
-    address_uz: Mapped[str] = mapped_column(nullable=True)
-    address_ru: Mapped[str] = mapped_column(nullable=True)
-    order_group_id: Mapped[int] = mapped_column(BigInteger, nullable=True)
-    cart_number: Mapped[int] = mapped_column(BigInteger, nullable=True)
-    photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/')), nullable=True)
-    is_active: Mapped[bool]
+    work_status: Mapped[str] = mapped_column(SqlEnum(WorkTime))
+    lat: Mapped[float]
+    long: Mapped[float]
+    district_uz: Mapped[str]
+    district_ru: Mapped[str]
+    address_uz: Mapped[str]
+    address_ru: Mapped[str]
+    order_group_id: Mapped[int] = mapped_column(BigInteger)
+    cart_number: Mapped[int] = mapped_column(BigInteger)
+    photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/')))
+    is_active: Mapped[bool] = mapped_column(nullable=False)
     work: Mapped[list['WorkTimes']] = relationship('WorkTimes', lazy='selectin', back_populates='shop')
-
 
     @classmethod
     async def get_shops_from_user(cls, id_):

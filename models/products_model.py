@@ -10,11 +10,10 @@ from models.database import BaseModel, db
 class ShopCategory(BaseModel):
     name_uz: Mapped[str] = mapped_column(VARCHAR(255))
     name_ru: Mapped[str] = mapped_column(VARCHAR(255))
-    shop_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shops.id', ondelete='CASCADE'),
-                                         nullable=True)
+    shop_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shops.id', ondelete='CASCADE'))
     parent_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shop_categories.id', ondelete='CASCADE'),
                                            nullable=True)
-    photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/')), nullable=True)
+    photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/')))
     is_active: Mapped[bool]
 
     @classmethod
@@ -31,18 +30,17 @@ class ShopCategory(BaseModel):
 class ShopProduct(BaseModel):
     name_uz: Mapped[str] = mapped_column(VARCHAR(255))
     name_ru: Mapped[str] = mapped_column(VARCHAR(255))
-    description_uz: Mapped[str] = mapped_column(String(255), nullable=True)
-    description_ru: Mapped[str] = mapped_column(String(255), nullable=True)
+    description_uz: Mapped[str] = mapped_column(String(255))
+    description_ru: Mapped[str] = mapped_column(String(255))
     owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('admin_panel_users.id', ondelete='CASCADE'))
     category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(ShopCategory.id, ondelete='CASCADE'))
-    photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/')), nullable=True)
-    shop_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shops.id', ondelete='CASCADE'), nullable=True)
+    photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/')))
+    shop_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shops.id', ondelete='CASCADE'))
     is_active: Mapped[bool]
     price: Mapped[int] = mapped_column(BigInteger)
     volume: Mapped[int]
     unit: Mapped[str]
     tips: Mapped[list['ProductTip']] = relationship('ProductTip', lazy='selectin', back_populates='product')
-
 
     @classmethod
     async def get_products_category(cls, category_id):

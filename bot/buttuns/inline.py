@@ -45,12 +45,11 @@ def menu(user_id, admin=False):
     ikb = InlineKeyboardBuilder()
     ikb.add(*[InlineKeyboardButton(text="🛒QAZI BOT🛒",
                                    web_app=WebAppInfo(
-                                       url=f'http://oka-uz.uz/#/{user_id}'))])
+                                       url=f'https://oka-uz.uz/#/{user_id}'))])
     if admin:
         ikb.add(*[InlineKeyboardButton(text="⚙️Settings⚙️", callback_data='game_settings')])
     ikb.adjust(1, 2)
     return ikb.as_markup()
-
 
 def contact():
     ikb = ReplyKeyboardBuilder()

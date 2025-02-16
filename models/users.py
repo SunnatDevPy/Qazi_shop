@@ -67,7 +67,7 @@ class Cart(BaseModel):
     product_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("shop_products.id", ondelete='CASCADE'))
     shop_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('shops.id', ondelete="CASCADE"))
     tip_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("product_tips.id", ondelete='CASCADE'))
-    count: Mapped[int] = mapped_column(nullable=True)
+    count: Mapped[int] = mapped_column()
     volume: Mapped[int]
     unit: Mapped[str]
     price: Mapped[int]
@@ -88,15 +88,15 @@ class Order(BaseModel):
 
     bot_user_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('bot_users.id', ondelete='CASCADE'))
     payment: Mapped[bool] = mapped_column(SqlEnum(Payment), default=Payment.CASH.value)
-    status: Mapped[str] = mapped_column(SqlEnum(StatusOrder), nullable=True)
-    address: Mapped[str] = mapped_column(String, nullable=True)
+    status: Mapped[str] = mapped_column(SqlEnum(StatusOrder))
+    address: Mapped[str] = mapped_column(String)
     shop_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('shops.id', ondelete="CASCADE"))
-    first_last_name: Mapped[str] = mapped_column(String, nullable=True)
-    contact: Mapped[str] = mapped_column(String, nullable=True)
-    driver_price: Mapped[int] = mapped_column(BIGINT, nullable=True, default=0)
-    total_sum: Mapped[int] = mapped_column(BIGINT, nullable=True)
-    lat: Mapped[float] = mapped_column(nullable=True)
-    long: Mapped[float] = mapped_column(nullable=True)
+    first_last_name: Mapped[str] = mapped_column(String)
+    contact: Mapped[str] = mapped_column(String)
+    driver_price: Mapped[int] = mapped_column(BIGINT,  default=0)
+    total_sum: Mapped[int] = mapped_column(BIGINT)
+    lat: Mapped[float]
+    long: Mapped[float]
 
     @classmethod
     async def get_from_bot_user_in_type(cls, user_id, status):
@@ -112,7 +112,7 @@ class Order(BaseModel):
 class OrderItem(BaseModel):
     product_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("shop_products.id", ondelete='CASCADE'))
     order_id: Mapped[int] = mapped_column(BIGINT, ForeignKey(Order.id, ondelete='CASCADE'))
-    count: Mapped[float] = mapped_column(default=1, nullable=True)
+    count: Mapped[float] = mapped_column(default=1)
     volume: Mapped[int]
     unit: Mapped[str]
     price: Mapped[int]
