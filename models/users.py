@@ -76,19 +76,21 @@ class Cart(BaseModel):
 
 class Order(BaseModel):
     class StatusOrder(str, Enum):
-        NEW = "YANGI"
-        IS_GOING = "Yig'ilmoqda"
-        IN_PROGRESS = "YETKAZILMOQDA"
-        DELIVERED = "YETKAZILDI"
-        CANCELLED = "BEKOR QILINDI"
+        NEW = "yangi"
+        IS_GOING = "yig'ilmoqda"
+        IN_PROGRESS = "yetkazilmoqda"
+        DELIVERED = "yetkazildi"
+        CANCELLED = "bekor qilindi"
 
     class Payment(str, Enum):
         CASH = "naqt"
         TERMINAL = "karta"
 
-    bot_user_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('bot_users.id', ondelete='CASCADE'))
     payment: Mapped[bool] = mapped_column(SqlEnum(Payment), default=Payment.CASH.value)
     status: Mapped[str] = mapped_column(SqlEnum(StatusOrder))
+
+
+    bot_user_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('bot_users.id', ondelete='CASCADE'))
     address: Mapped[str] = mapped_column(String)
     shop_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('shops.id', ondelete="CASCADE"))
     first_last_name: Mapped[str] = mapped_column(String)
