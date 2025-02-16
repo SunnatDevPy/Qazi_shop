@@ -1,3 +1,4 @@
+import logging
 from _ctypes_test import func
 from datetime import datetime
 
@@ -46,6 +47,18 @@ class AsyncDatabaseSession:
     async def drop_all(self):
         async with self._engine.begin() as conn:
             await conn.run_sync(Base.metadata.drop_all)
+
+    async def execute(self, stmt):
+        """Безопасное выполнение запросов"""
+        async with self._session.begin():
+            try:
+                result = await self._session.execute(stmt)
+                await self._session.commit()
+                return result
+            except Exception as e:
+                logging.error(f"Ошибка SQLAlchemy: {e}")
+                await self._session.rollback()
+                raise
 
 
 db = AsyncDatabaseSession()
