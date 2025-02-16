@@ -145,7 +145,7 @@ async def list_category_shop(operator_id: int,
         if photo:
             if not photo.content_type.startswith("image/"):
                 return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
-        if work_status == 'string':
+        if work_status == 'string' or work_status == '':
             work_status = 'open'
 
         update_data = {k: v for k, v in {
