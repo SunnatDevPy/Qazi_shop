@@ -14,11 +14,12 @@ class Shop(BaseModel):
         OPEN = 'ochiq'
         CLOSE = 'yopiq'
 
+    work_status: Mapped[str] = mapped_column(SqlEnum(WorkTime))
+
     name_uz: Mapped[str] = mapped_column(VARCHAR(255))
     name_ru: Mapped[str] = mapped_column(VARCHAR(255))
     owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('admin_panel_users.id', ondelete='CASCADE'),
                                           nullable=True)
-    work_status: Mapped[str] = mapped_column(SqlEnum(WorkTime))
     lat: Mapped[float]
     long: Mapped[float]
     district_uz: Mapped[str]
