@@ -48,17 +48,15 @@ class AsyncDatabaseSession:
         async with self._engine.begin() as conn:
             await conn.run_sync(Base.metadata.drop_all)
 
-    async def execute(self, stmt):
-        """Безопасное выполнение запросов"""
-        async with self._session.begin():
-            try:
-                result = await self._session.execute(stmt)
-                await self._session.commit()
-                return result
-            except Exception as e:
-                logging.error(f"Ошибка SQLAlchemy: {e}")
-                await self._session.rollback()
-                raise
+    # async def execute(self, stmt):
+    #     try:
+    #         result = await self._session.execute(stmt)
+    #         await self._session.commit()
+    #         return result
+    #     except Exception as e:
+    #         logging.error(f"Ошибка SQLAlchemy: {e}")
+    #         await self._session.rollback()
+    #         raise
 
 
 db = AsyncDatabaseSession()

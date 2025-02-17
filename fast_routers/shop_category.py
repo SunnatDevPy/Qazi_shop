@@ -4,7 +4,7 @@ from fastapi import APIRouter, Form, UploadFile, File
 from fastapi import Response
 from pydantic import BaseModel
 from starlette import status
-
+import pandas as pd
 from models import AdminPanelUser, ShopCategory, Shop
 
 shop_category_router = APIRouter(prefix='/shop-categories', tags=['Shop Categories'])
@@ -33,6 +33,16 @@ async def list_category_shop(shop_id: int):
         return category
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
+
+
+# @shop_category_router.post(path='/save-excel', name="Create Excel file Category")
+# async def list_category_shop(user_id: int, file: UploadFile = File(...)):
+#     user = await AdminPanelUser.get(user_id)
+#     if user:
+#         if not file.filename.endswith(".xlsx"):
+#             return {"error": "Fayl faqat xlsx formatda bo'lish kerak"}
+#     else:
+#         return Response("User topilmadi", status.HTTP_404_NOT_FOUND)
 
 
 @shop_category_router.post(path='', name="Create Category")

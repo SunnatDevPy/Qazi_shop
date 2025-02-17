@@ -1,6 +1,8 @@
 from aiogram.types import InlineKeyboardButton, KeyboardButton, WebAppInfo
 from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
 
+from models import Shop
+
 
 def language_inl():
     ikb = InlineKeyboardBuilder()
@@ -10,18 +12,19 @@ def language_inl():
     return ikb.as_markup()
 
 
-def confirm_register_inl():
+def shop_setting_menu():
     ikb = InlineKeyboardBuilder()
-    ikb.add(*[InlineKeyboardButton(text='✅Tasdiqlash✅', callback_data=f'confirm_register'),
-              InlineKeyboardButton(text='❌Cancel❌', callback_data=f'cancel_register')])
+    ikb.add(*[InlineKeyboardButton(text="Gurux o'zgartirish", callback_data=f'group_setting'),
+              InlineKeyboardButton(text='Ortga', callback_data=f'group_back')])
     ikb.adjust(2, repeat=True)
     return ikb.as_markup()
 
 
-async def my_address(address, user_id):
+async def shops_button():
     ikb = InlineKeyboardBuilder()
-    ikb.add(*[InlineKeyboardButton(text=i.address, callback_data=f'address_{user_id}_{i.lat}_{i.long}_{i.id}') for i in
-              address])
+    shops: list[Shop] = await Shop.all()
+    ikb.add(*[InlineKeyboardButton(text=i.name_uz, callback_data=f'shop_{i.id}_{i.order_group_id}') for i in
+              shops])
     ikb.adjust(1, repeat=True)
     return ikb.as_markup()
 
@@ -47,9 +50,10 @@ def menu(user_id, admin=False):
                                    web_app=WebAppInfo(
                                        url=f'https://oka-uz.uz/#/{user_id}'))])
     if admin:
-        ikb.add(*[InlineKeyboardButton(text="⚙️Settings⚙️", callback_data='game_settings')])
+        ikb.add(*[InlineKeyboardButton(text="⚙️Settings⚙️", callback_data='settings')])
     ikb.adjust(1, 2)
     return ikb.as_markup()
+
 
 def contact():
     ikb = ReplyKeyboardBuilder()
