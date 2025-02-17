@@ -34,10 +34,11 @@ app.add_middleware(SessionMiddleware, secret_key=conf.SECRET_KEY)
 app.add_middleware(
     CORSMiddleware,
     # allow_origins=["http://localhost:8000", "https://arava1.vercel.app"],
-    allow_origins=["http://localhost:8000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+
 )
 
 # minio_handler = MinioHandler(
