@@ -2,7 +2,7 @@ from fastapi import APIRouter, Form, HTTPException
 from fastapi import Response
 from starlette import status
 
-from models import BotUser, Cart, ProductTip
+from models import BotUser, Cart, ProductTip, ShopProduct, Shop
 from utils.details import detail_cart, get_carts_
 
 cart_router = APIRouter(prefix='/carts', tags=['Cart'])
@@ -49,16 +49,29 @@ async def list_category_shop(client_id: int,
     user = await BotUser.get(client_id)
     cart = await Cart.get_cart_from_product(client_id, product_id)
     tip = await ProductTip.get(tip_id)
-    if user and tip:
-        if cart and cart.tip_id == tip_id:
-            await Cart.update(cart.id, count=count + cart.count, total=cart.total + (count * tip.price))
+    product: ShopProduct = await ShopProduct.get(product_id)
+    shop: Shop = await Shop.get(shop_id)
+    if user:
+        if shop:
+            if tip:
+                if product_id:
+                    if cart and cart.tip_id == tip_id:
+                        await Cart.update(cart.id, count=count + cart.count, total=cart.total + (count * tip.price))
+                    else:
+                        cart = await Cart.create(bot_user_id=user.id, product_id=product_id, count=count,
+                                                 shop_id=shop_id,
+                                                 volume=tip.volume, tip_id=tip_id, unit=tip.unit, price=tip.price,
+                                                 total=tip.price * count, product_name_uz=product.name_uz,
+                                                 product_name_ru=product.name_ru)
+                    return {"ok": True, "cart": cart}
+                else:
+                    return Response("Product topilmadi", status.HTTP_404_NOT_FOUND)
+            else:
+                return Response("Tip topilmadi", status.HTTP_404_NOT_FOUND)
         else:
-            cart = await Cart.create(bot_user_id=user.id, product_id=product_id, count=count, shop_id=shop_id,
-                                     volume=tip.volume, tip_id=tip_id, unit=tip.unit, price=tip.price,
-                                     total=tip.price * count)
-        return {"ok": True, "cart": cart}
+            return Response("Shop topilmadi", status.HTTP_404_NOT_FOUND)
     else:
-        return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
+        return Response("User topilmadi", status.HTTP_404_NOT_FOUND)
 
 
 @cart_router.delete("/delete", name="Delete Product in cart")
@@ -84,6 +97,3 @@ async def list_category_shop(cart_id: int, count: int, minus=None, plus=None):
         return {"ok": True}
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
-
-
-

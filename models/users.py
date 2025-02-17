@@ -65,6 +65,8 @@ class MyAddress(BaseModel):
 class Cart(BaseModel):
     bot_user_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("bot_users.id", ondelete='CASCADE'))
     product_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("shop_products.id", ondelete='CASCADE'))
+    product_name_uz: Mapped[str]
+    product_name_ru: Mapped[str]
     shop_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('shops.id', ondelete="CASCADE"))
     tip_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("product_tips.id", ondelete='CASCADE'))
     count: Mapped[int] = mapped_column()
@@ -89,13 +91,12 @@ class Order(BaseModel):
     payment: Mapped[bool] = mapped_column(SqlEnum(Payment), default=Payment.CASH.value)
     status: Mapped[str] = mapped_column(SqlEnum(StatusOrder))
 
-
     bot_user_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('bot_users.id', ondelete='CASCADE'))
     address: Mapped[str] = mapped_column(String)
     shop_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('shops.id', ondelete="CASCADE"))
     first_last_name: Mapped[str] = mapped_column(String)
     contact: Mapped[str] = mapped_column(String)
-    driver_price: Mapped[int] = mapped_column(BIGINT,  default=0)
+    driver_price: Mapped[int] = mapped_column(BIGINT, default=0)
     total_sum: Mapped[int] = mapped_column(BIGINT)
     lat: Mapped[float]
     long: Mapped[float]

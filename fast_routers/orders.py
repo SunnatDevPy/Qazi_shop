@@ -8,7 +8,7 @@ from starlette import status
 
 from dispatcher import bot
 from fast_routers import geolocator
-from models import BotUser, Shop, Cart, Order, OrderItem, MyAddress
+from models import BotUser, Shop, Cart, Order, OrderItem, MyAddress, AdminPanelUser
 from utils.details import detail_order, sum_price_carts, detail_orders_types
 
 order_router = APIRouter(prefix='/order', tags=['Orders'])
@@ -62,7 +62,7 @@ async def list_category_shop(user_id: int, shop_id: int):
 
 
 class CreateOrder(BaseModel):
-    payment_type: str
+    payment: str
     long: float
     lat: float
     contact: str
@@ -74,29 +74,37 @@ class CreateOrder(BaseModel):
 async def list_category_shop(client_id: int, shop_id: int, items: Annotated[CreateOrder, Form()]):
     user = await BotUser.get(client_id)
     shop = await Shop.get(shop_id)
-    if items.payment_type not in ['CASH', "TERMINAL", "karta", 'naqt']:
+    if items.payment not in ['CASH', "TERMINAL", "karta", 'naqt']:
         return Response("Payment type notog'ri yuborildi", status.HTTP_404_NOT_FOUND)
 
-    if user and shop:
-        carts: list['Cart'] = await Cart.get_cart_from_shop(client_id, shop_id)
-        distance_km = geodesic((shop.lat, shop.long), (user.lat, user.long)).kilometers
-        sum_order = sum_price_carts(carts)
-        order = await Order.create(user_id=client_id, **items.dict(), total_sum=sum_order, driver_price=distance_km,
-                                   shop_id=shop_id, bot_user_id=client_id)
-        order_items = []
-        for i in carts:
-            s = await OrderItem.create(product_id=i.product_id, order_id=order.id, count=i.count,
-                                       volume=i.volume, unit=i.unit, price=i.price, total=i.total)
-            order_items.append(s)
-            await Cart.delete(i.id)
-        try:
-            await bot.send_message(shop.order_group_id, await detail_order(order), parse_mode="HTML")
-        except:
-            await bot.send_message(user.id, await detail_order(order), parse_mode="HTML")
-        return {"ok": True, "message": "Buyurtma qabul qilindi va guruxga yuborildi ", "order": order,
-                "order_items": order_items}
+    if user:
+        if shop:
+            carts: list['Cart'] = await Cart.get_cart_from_shop(client_id, shop_id)
+            distance_km = geodesic((shop.lat, shop.long), (items.lat, items.long)).kilometers
+            sum_order = sum_price_carts(carts)
+            order = await Order.create(**items.dict(), total_sum=sum_order, driver_price=distance_km,
+                                       shop_id=shop_id, bot_user_id=client_id)
+            order_items = []
+            for i in carts:
+                s = await OrderItem.create(product_id=i.product_id, order_id=order.id, count=i.count,
+                                           volume=i.volume, unit=i.unit, price=i.price, total=i.total)
+                order_items.append(s)
+                await Cart.delete(i.id)
+            message = None
+            try:
+                location = await bot.send_location(shop.order_group_id, latitude=order.lat, longitude=order.long)
+                await bot.send_message(shop.order_group_id, await detail_order(order), parse_mode="HTML",
+                                       reply_to_message_id=location.message_id)
+            except:
+                message = 'Buyurtma yaratildi lekin guruxga yuborishda hatolik'
+            return {"ok": True,
+                    "message": "Buyurtma qabul qilindi va guruxga yuborildi" if message == None else message,
+                    "order": order,
+                    "order_items": order_items}
+        else:
+            return Response("Shop topilmadi", status.HTTP_404_NOT_FOUND)
     else:
-        return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
+        return Response("User topilmadi", status.HTTP_404_NOT_FOUND)
 
 
 class UpdateOrder(BaseModel):

@@ -9,7 +9,7 @@ bot_user_router = APIRouter(prefix='/bot-users', tags=['Bot User'])
 
 
 class UserAdd(BaseModel):
-    id_: int
+    id: int
     first_name: str
     last_name: str
     username: Optional[str] = None

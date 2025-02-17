@@ -214,7 +214,7 @@ async def list_category_shop(product_tip_id: int):
     if tips:
         return tips
     else:
-        return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
+        return Response("Tip topilmadi", status.HTTP_404_NOT_FOUND)
 
 
 @shop_product_router.post(path='/tips', name="Create Product Tips")
@@ -224,7 +224,7 @@ async def list_category_shop(operator_id: int,
                              volume: int = Form(),
                              unit: str = Form()):
     user: AdminPanelUser = await AdminPanelUser.get(operator_id)
-    product = await ShopCategory.get(product_id)
+    product = await ShopProduct.get(product_id)
     if user:
         if product:
             if user.status in ['moderator', "admin", "superuser"]:
@@ -239,9 +239,9 @@ async def list_category_shop(operator_id: int,
             else:
                 return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
         else:
-            return Response("Category id shop id ga tegishli emas", status.HTTP_404_NOT_FOUND)
+            return Response("Product topilmadi", status.HTTP_404_NOT_FOUND)
     else:
-        return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
+        return Response("User topilmadi", status.HTTP_404_NOT_FOUND)
 
 
 class UpdateTips(BaseModel):
