@@ -40,6 +40,12 @@ async def list_category_shop(user_id: int):
 
 @order_router.get(path='/from-type', name="Get Order from Type in User")
 async def list_category_shop(user_id: int, type: str):
+    if type not in ['yangi', 'NEW', "IS_GOING", "yig'ilmoqda",
+                    "IN_PROGRESS", "yetkazilmoqda",
+                    "DELIVERED", "yetkazildi",
+                    "CANCELLED", "bekor qilindi"]:
+        return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
+
     orders = await Order.get_from_bot_user_in_type(user_id, type)
     if orders:
         return {'orders': orders}
@@ -99,7 +105,7 @@ class UpdateOrder(BaseModel):
     status: Optional[str] = None
 
 
-@order_router.post(path='', name="Update Order")
+@order_router.patch(path='', name="Update Order")
 async def list_category_shop(order_id: int, items: Annotated[UpdateOrder, Form()]):
     order = await Order.get(order_id)
     if order:
@@ -110,7 +116,7 @@ async def list_category_shop(order_id: int, items: Annotated[UpdateOrder, Form()
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
 
-@order_router.post(path='/canceled', name="Canceled Order")
+@order_router.patch(path='/canceled', name="Canceled Order")
 async def list_category_shop(user_id: int, order_id: int):
     order = await Order.get(order_id)
     if order:
