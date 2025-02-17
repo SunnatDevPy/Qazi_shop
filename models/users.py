@@ -52,7 +52,7 @@ class AdminPanelUser(BaseModel):
     @classmethod
     async def get_from_username(cls, username):
         query = select(cls).order_by(desc(cls.id)).filter(cls.username == username)
-        return (await db.execute(query)).scalars().all()
+        return (await db.execute(query)).scalar()
 
 
 class MyAddress(BaseModel):

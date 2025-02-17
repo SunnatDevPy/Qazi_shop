@@ -1,5 +1,6 @@
 from typing import Annotated, Optional
 
+import bcrypt
 from fastapi import APIRouter, HTTPException, Form
 from pydantic import BaseModel
 
@@ -112,28 +113,39 @@ class UserLogin(BaseModel):
     password: Optional[str] = None
 
 
-@admin_user_router.post(path='/login', name="Login")
-async def login(items: Annotated[UserLogin, Form()]):
-    user = await AdminPanelUser.get_from_username_and_password(items.password, items.username)
-    if user:
-        return {"user": user}
-    else:
-        raise HTTPException(status_code=404, detail="Item not found")
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
+
+@admin_user_router.post(path='/login', name="Login")
+async def login(items: Annotated[UserLogin, Form()]) -> UserList:
+    user = await AdminPanelUser.get_from_username(items.username)
+    if user:
+        if verify_password(items.password, user.password):
+            return user
+        else:
+            raise HTTPException(status_code=404, detail="parol yoki usernameda hatolik")
+    else:
+        raise HTTPException(status_code=404, detail="parol yoki usernameda hatolik")
 
 class Register(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     username: Optional[str] = None
     contact: Optional[str] = None
-    password: Optional[str] = None
+    password: str
+
+
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
 
 @admin_user_router.post(path='/register', name="Register")
-async def register(items: Annotated[Register, Form()]):
+async def register(items: Annotated[Register, Form()]) -> UserList:
+    items.password = hash_password(items.password)
     user = await AdminPanelUser.get_from_username(items.username)
-    if user is not None:
-        user = await AdminPanelUser.create(**items.dict(), status="moderator", day_and_night=False, is_active=False)
-        return {"user": user}
-    else:
+    if user:
         raise HTTPException(status_code=404, detail="Bunday username bor")
+    else:
+        user = await AdminPanelUser.create(**items.dict(), status="moderator", day_and_night=False, is_active=False)
+        return user

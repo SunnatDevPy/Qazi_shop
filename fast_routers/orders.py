@@ -38,14 +38,13 @@ async def list_category_shop(user_id: int):
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
 
-@order_router.get(path='/from-type', name="Get Order from Type in User")
-async def list_category_shop(user_id: int, type: str):
-    if type not in ['yangi', 'NEW', "IS_GOING", "yig'ilmoqda",
-                    "IN_PROGRESS", "yetkazilmoqda",
-                    "DELIVERED", "yetkazildi",
-                    "CANCELLED", "bekor qilindi"]:
-        return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
-
+@order_router.get(path='/from-status', name="Get Order from Status in User")
+async def list_category_shop(user_id: int, status_order: str):
+    if status_order not in ['yangi', 'NEW', "IS_GOING", "yig'ilmoqda",
+                            "IN_PROGRESS", "yetkazilmoqda",
+                            "DELIVERED", "yetkazildi",
+                            "CANCELLED", "bekor qilindi"]:
+        return Response("Buyurtmaga notog'ri status berilgan", status.HTTP_404_NOT_FOUND)
     orders = await Order.get_from_bot_user_in_type(user_id, type)
     if orders:
         return {'orders': orders}
@@ -62,29 +61,28 @@ async def list_category_shop(user_id: int, shop_id: int):
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
 
+class CreateOrder(BaseModel):
+    payment_type: str
+    long: float
+    lat: float
+    contact: str
+    address: str
+    first_last_name: str
+
+
 @order_router.post(path='', name="Create Order from User")
-async def list_category_shop(client_id: int,
-                             shop_id: int,
-                             payment_type: str,
-                             phone: str,
-                             long: int,
-                             lat: int):
+async def list_category_shop(client_id: int, shop_id: int, items: Annotated[CreateOrder, Form()]):
     user = await BotUser.get(client_id)
     shop = await Shop.get(shop_id)
+    if items.payment_type not in ['CASH', "TERMINAL", "karta", 'naqt']:
+        return Response("Payment type notog'ri yuborildi", status.HTTP_404_NOT_FOUND)
+
     if user and shop:
         carts: list['Cart'] = await Cart.get_cart_from_shop(client_id, shop_id)
         distance_km = geodesic((shop.lat, shop.long), (user.lat, user.long)).kilometers
         sum_order = sum_price_carts(carts)
-        location = geolocator.reverse(f"{lat}, {long}")
-        address = location.raw['address']
-        if address:
-            await MyAddress.create(bot_user_id=client_id, lat=lat, long=long,
-                                   name=f"{address['county']}, {address['neighbourhood']}, {address['road']}")
-        order = await Order.create(user_id=client_id, payment=payment_type, status="NEW", shop_id=shop_id,
-                                   total_sum=sum_order,
-                                   address=address, last_first_name=f"{user.first_name} {user.last_name}",
-                                   contact=phone, long=long, lat=lat,
-                                   driver_price=0 if sum_order[0] > 1500000 else 50000 * distance_km)
+        order = await Order.create(user_id=client_id, **items.dict(), total_sum=sum_order, driver_price=distance_km,
+                                   shop_id=shop_id, bot_user_id=client_id)
         order_items = []
         for i in carts:
             s = await OrderItem.create(product_id=i.product_id, order_id=order.id, count=i.count,
@@ -102,11 +100,16 @@ async def list_category_shop(client_id: int,
 
 
 class UpdateOrder(BaseModel):
-    status: Optional[str] = None
+    order_status: Optional[str] = None
 
 
 @order_router.patch(path='', name="Update Order")
 async def list_category_shop(order_id: int, items: Annotated[UpdateOrder, Form()]):
+    if items.status not in ['yangi', 'NEW', "IS_GOING", "yig'ilmoqda",
+                            "IN_PROGRESS", "yetkazilmoqda",
+                            "DELIVERED", "yetkazildi",
+                            "CANCELLED", "bekor qilindi"]:
+        return Response("Buyurtmaga notog'ri status berilgan", status.HTTP_404_NOT_FOUND)
     order = await Order.get(order_id)
     if order:
         update_data = {k: v for k, v in items.dict().items() if v is not None}

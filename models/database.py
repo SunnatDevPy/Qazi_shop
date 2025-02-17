@@ -101,8 +101,8 @@ class AbstractClass:
         return (await db.execute(query)).scalar()
 
     @classmethod
-    async def get_from_username_and_password(cls, password, user_name, *, relationship=None):
-        query = select(cls).where(cls.password == password, cls.username == user_name)
+    async def get_from_username(cls, user_name, *, relationship=None):
+        query = select(cls).where(cls.username == user_name)
         if relationship:
             query = query.options(selectinload(relationship))
         return (await db.execute(query)).scalar()
