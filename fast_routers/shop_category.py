@@ -78,6 +78,9 @@ async def list_category_shop(operator_id: int,
                              is_active: bool = Form(default=None),
                              photo: UploadFile = File(default=None)):
     user: AdminPanelUser = await AdminPanelUser.get(operator_id)
+    if photo:
+        if not photo.content_type.startswith("image/"):
+            return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
     if user:
         update_data = {k: v for k, v in
                        {"name_uz": name_uz, "name_ru": name_ru, "parent_id": parent_id, "is_active": is_active,
