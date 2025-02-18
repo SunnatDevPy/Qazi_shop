@@ -34,11 +34,7 @@ async def get_products_utils(shop_id):
     category = []
     for i in categories:
         products: list['ShopProduct'] = await ShopProduct.get_products_category(i.id)
-        prod = []
-        for j in products:
-            j.tips = await ProductTip.get_product_tips(j.id)
-            prod.append(j)
-        category.append({'category': i, "products": prod})
+        category.append({'category': i, "products": products})
     return category
 
 
