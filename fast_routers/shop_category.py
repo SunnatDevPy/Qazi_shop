@@ -80,7 +80,7 @@ async def list_category_shop(operator_id: int,
     user: AdminPanelUser = await AdminPanelUser.get(operator_id)
     if user:
         update_data = {k: v for k, v in
-                       {"name_uz": name_uz, "name_ru": name_ru, "parent_id": parent_id, "is_active": bool,
+                       {"name_uz": name_uz, "name_ru": name_ru, "parent_id": parent_id, "is_active": is_active,
                         "photo": photo}.items() if
                        v is not None}
         if user.status in ['moderator', "admin", "superuser"]:

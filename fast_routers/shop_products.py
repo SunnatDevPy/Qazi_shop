@@ -157,6 +157,8 @@ async def list_category_shop(operator_id: int,
                              ):
     user: AdminPanelUser = await AdminPanelUser.get(operator_id)
     product = await ShopProduct.get(shop_product_id)
+    if category_id == 0:
+        category_id = None
     if photo:
         if not photo.content_type.startswith("image/"):
             return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
