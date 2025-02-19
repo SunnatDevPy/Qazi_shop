@@ -45,6 +45,7 @@ class ProductTipSchema(BaseModel):
     unit: str
 
 
+
 class ProductList(BaseModel):
     id: int
     name_uz: str
