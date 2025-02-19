@@ -58,7 +58,7 @@ class ProductTip(BaseModel):
     price: Mapped[int] = mapped_column(BigInteger)
     volume: Mapped[int]
     unit: Mapped[str] = mapped_column(String, nullable=False)
-    product: Mapped[list['ShopProduct']] = relationship('ShopProduct', lazy='selectin', back_populates='tips')
+    product: Mapped['ShopProduct'] = relationship('ShopProduct', lazy='selectin', back_populates='tips')
 
     @classmethod
     async def get_product_tips(cls, id_):
