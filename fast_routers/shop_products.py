@@ -196,26 +196,30 @@ async def list_category_shop(operator_id: int, shop_product_id: int):
 
 # ================= Product Tips =============================
 
+class ProductTipsSchema(BaseModel):
+    id: int
+    product_id: int
+    price: int
+    volume: int
+    unit: str
+
 
 @shop_product_router.get(path='/tips', name="Get All Product tips")
-async def list_category_shop():
+async def list_category_shop() -> list[ProductTipsSchema]:
     tips = await ProductTip.all()
-    return {"tips": tips}
+    return tips
 
 
 @shop_product_router.get(path='/tips/detail', name="Get product tip")
-async def list_category_shop(product_tip_id: int):
+async def list_category_shop(product_tip_id: int) -> list[ProductTipsSchema]:
     tip = await ProductTip.get(product_tip_id)
-    return {"tip": tip}
+    return tip
 
 
 @shop_product_router.get(path='/tips/from-product', name="Get from Products")
-async def list_category_shop(product_tip_id: int):
+async def list_category_shop(product_tip_id: int) -> list[ProductTipsSchema]:
     tips = await ProductTip.get_product_tips(product_tip_id)
-    if tips:
-        return tips
-    else:
-        return Response("Tip topilmadi", status.HTTP_404_NOT_FOUND)
+    return tips
 
 
 @shop_product_router.post(path='/tips', name="Create Product Tips")
