@@ -2,6 +2,7 @@ from typing import Optional, Annotated, List
 
 from fastapi import APIRouter, File, UploadFile, Form
 from fastapi import Response
+from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from starlette import status
 
@@ -82,7 +83,7 @@ async def list_category_shop(product_id: int):
 async def list_category_shop(shop_id: int):
     products = await get_products_utils(shop_id)
     if products:
-        return products
+        return jsonable_encoder(products, exclude_unset=True)
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
