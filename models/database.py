@@ -156,6 +156,10 @@ class AbstractClass:
         return (await db.execute(select(cls).where(cls.bot_user_id == user_id, cls.shop_id == shop_id))).scalars().all()
 
     @classmethod
+    async def get_from_shop(cls, shop_id):
+        return (await db.execute(select(cls).where(cls.shop_id == shop_id))).scalars().all()
+
+    @classmethod
     async def from_shop(cls, shop_id):
         return (await db.execute(select(cls).where(cls.shop_id == shop_id))).scalars().all()
 
