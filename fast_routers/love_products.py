@@ -72,11 +72,11 @@ async def list_category_shop(product_id: int, shop_id: int, bot_user_id: int):
     user: BotUser = await BotUser.get(bot_user_id)
     product = await ShopProduct.get_shop_product_id(product_id, shop_id)
     shop = await Shop.get(shop_id)
-    if user:
+    if user and shop:
         if product:
             try:
                 product = await LoveProducts.create(shop_id=shop_id, bot_user_id=bot_user_id, product_id=product_id)
-                return {"ok": True, "id": product.id}
+                return {"ok": True, "product": product}
             except Exception as e:
                 return {"error": e}
 
