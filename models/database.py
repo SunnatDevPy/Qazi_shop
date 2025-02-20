@@ -113,6 +113,13 @@ class AbstractClass:
         return (await db.execute(query)).scalars()
 
     @classmethod
+    async def get_shop_product_id(cls, product_id, shop_id, *, relationship=None):
+        query = select(cls).where(cls.product_id == product_id, cls.shop_id == shop_id).order_by(desc(cls.id))
+        if relationship:
+            query = query.options(selectinload(relationship))
+        return (await db.execute(query)).scalars()
+
+    @classmethod
     async def from_user_order(cls, _id, *, relationship=None):
         query = select(cls).where(cls.user_id == _id).order_by(desc(cls.id))
         if relationship:
