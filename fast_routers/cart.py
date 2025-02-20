@@ -84,12 +84,9 @@ async def list_category_shop(client_id: int,
     if user:
         if shop:
             if tip:
-                if product_id:
-                    if cart and cart.tip_id == tip_id:
-                        await Cart.update(cart.id, count=count + cart.count, total=cart.total + (count * tip.price))
-                    else:
-                        cart = await Cart.create(bot_user_id=user.id, product_id=product_id, count=count,
-                                                 shop_id=shop_id, tip_id=tip_id, total=tip.price * count)
+                if product:
+                    cart = await Cart.create(bot_user_id=user.id, product_id=product_id, count=count,
+                                             shop_id=shop_id, tip_id=tip_id, total=tip.price * count)
                     return {"ok": True, "cart": cart}
                 else:
                     return Response("Product topilmadi", status.HTTP_404_NOT_FOUND)
