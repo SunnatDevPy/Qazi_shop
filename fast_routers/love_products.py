@@ -64,7 +64,7 @@ async def list_category_shop(shop_id: int) -> list[FavouritesSchema]:
 @favourites_router.post(path='', name="Create Product from Favourites")
 async def list_category_shop(product_id: int, shop_id: int, bot_user_id: int):
     user: BotUser = await BotUser.get(bot_user_id)
-    product = await ShopProduct.get_from_shop(product_id)
+    product = await ShopProduct.get(product_id)
     shop = await Shop.get(shop_id)
     if user and shop:
         if product:
