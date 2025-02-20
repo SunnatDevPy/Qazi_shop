@@ -68,8 +68,12 @@ async def list_category_shop(product_id: int, shop_id: int, bot_user_id: int):
     shop = await Shop.get(shop_id)
     if user and shop:
         if product:
-            product = await LoveProducts.create(shop_id=shop_id, bot_user_id=bot_user_id, product_id=product_id)
-            return {"ok": True, "id": product.id}
+            try:
+                product = await LoveProducts.create(shop_id=shop_id, bot_user_id=bot_user_id, product_id=product_id)
+                return {"ok": True, "id": product.id}
+            except Exception as e:
+                return {"error": e}
+
         else:
             return Response("Product topilmadi", status.HTTP_404_NOT_FOUND)
     else:
