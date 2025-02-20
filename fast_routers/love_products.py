@@ -90,7 +90,7 @@ async def list_category_shop(product_id: int, shop_id: int, bot_user_id: int):
 async def list_category_shop(favourites_id: int):
     product = await LoveProducts.get(favourites_id)
     if product:
-        await ShopProduct.delete(favourites_id)
+        await LoveProducts.delete(favourites_id)
         return {'ok': True}
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
