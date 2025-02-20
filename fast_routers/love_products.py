@@ -61,6 +61,12 @@ async def list_category_shop(shop_id: int) -> list[FavouritesSchema]:
     return products
 
 
+@favourites_router.get(path='/from-user', name="Get from User and Shop Favourites")
+async def list_category_shop(shop_id: int, bot_user_id: int) -> list[FavouritesSchema]:
+    products = await LoveProducts.get_cart_from_shop(bot_user_id, shop_id)
+    return products
+
+
 @favourites_router.post(path='', name="Create Product from Favourites")
 async def list_category_shop(product_id: int, shop_id: int, bot_user_id: int):
     user: BotUser = await BotUser.get(bot_user_id)
