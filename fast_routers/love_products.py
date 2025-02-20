@@ -41,7 +41,7 @@ class FavouritesSchema(BaseModel):
     product_id: int
     shop_id: int
     bot_user_id: int
-    product: Optional[List[ProductList]] = None
+    product: Optional[ProductList] = None
 
 
 @favourites_router.get(path='', name="Get All Favourites")
