@@ -5,7 +5,7 @@ from fastapi_storages.integrations.sqlalchemy import ImageType
 from sqlalchemy import Boolean, select, desc
 from sqlalchemy import ForeignKey, BIGINT, Enum as SqlEnum
 from sqlalchemy import String
-from sqlalchemy.orm import mapped_column, Mapped
+from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy_file import ImageField
 
 from models.database import BaseModel, db
@@ -70,10 +70,9 @@ class Cart(BaseModel):
     shop_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('shops.id', ondelete="CASCADE"))
     tip_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("product_tips.id", ondelete='CASCADE'))
     count: Mapped[int] = mapped_column()
-    volume: Mapped[int]
-    unit: Mapped[str]
-    price: Mapped[int]
     total: Mapped[int]
+    product_in_cart: Mapped['ShopProduct'] = relationship('ShopProduct', lazy='selectin', back_populates='carts')
+    tip: Mapped['ProductTip'] = relationship('ProductTip', lazy='selectin', back_populates='cart')
 
 
 class Order(BaseModel):
@@ -124,5 +123,3 @@ class OrderItem(BaseModel):
 
 class ProjectAllStatus(BaseModel):
     day_and_night: Mapped[bool] = mapped_column(Boolean, default=False)
-
-

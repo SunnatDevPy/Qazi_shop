@@ -1,5 +1,8 @@
+from typing import Optional
+
 from fastapi import APIRouter, Form, HTTPException
 from fastapi import Response
+from pydantic import BaseModel
 from starlette import status
 
 from models import BotUser, Cart, ProductTip, ShopProduct, Shop
@@ -8,36 +11,63 @@ from utils.details import detail_cart, get_carts_
 cart_router = APIRouter(prefix='/carts', tags=['Cart'])
 
 
+class ProductTipSchema(BaseModel):
+    id: int
+    price: int
+    volume: int
+    unit: str
+
+
+class ProductList(BaseModel):
+    id: int
+    name_uz: str
+    name_ru: str
+    description_uz: str
+    description_ru: str
+    owner_id: int
+    category_id: int
+    photo: str
+    shop_id: int
+    is_active: bool
+    price: int
+    volume: int
+    unit: str
+
+
+class CartModel(BaseModel):
+    bot_user_id: int
+    product_id: int
+    product_name_uz: str
+    product_name_ru: str
+    shop_id: int
+    tip_id: int
+    count: int
+    product_in_cart: Optional[ProductList] = None
+    tips: Optional[ProductTipSchema] = None  # Prevent recursion
+
+
 @cart_router.get(path='', name="Carts")
-async def list_category_shop():
+async def list_category_shop() -> list[CartModel]:
     carts = await Cart.all()
-    return {"carts": carts}
+    return carts
 
 
 @cart_router.get(path='/detail', name="Get Cart")
-async def list_category_shop(cart_id: int):
+async def list_category_shop(cart_id: int) -> CartModel:
     cart = await Cart.get(cart_id)
-    if cart:
-        return {'cart': cart}
-    else:
-        return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
+    return cart
 
 
 @cart_router.get(path='/from-user', name="Get Cart")
-async def list_category_shop(bot_user_id: int):
+async def list_category_shop(bot_user_id: int) -> list[CartModel]:
     carts = await Cart.get_from_bot_user(bot_user_id)
-    return {'carts': carts}
+    return carts
 
 
 @cart_router.get(path='/from-user-shop', name="Get Cart in Shop")
-async def list_category_shop(user_id: int, shop_id: int):
-    carts = await detail_cart(shop_id, user_id)
-    return {'carts': carts}
-
-
-@cart_router.get(path='/by_user', name="Get Cart in Shop")
-async def list_category_shop(user_id: int):
-    return await get_carts_(user_id)
+async def list_category_shop(user_id: int, shop_id: int) -> list[CartModel]:
+    carts = await Cart.get_cart_from_shop(user_id, shop_id)
+    return carts
 
 
 @cart_router.post(path='', name="Create Cart from User")
@@ -59,10 +89,7 @@ async def list_category_shop(client_id: int,
                         await Cart.update(cart.id, count=count + cart.count, total=cart.total + (count * tip.price))
                     else:
                         cart = await Cart.create(bot_user_id=user.id, product_id=product_id, count=count,
-                                                 shop_id=shop_id,
-                                                 volume=tip.volume, tip_id=tip_id, unit=tip.unit, price=tip.price,
-                                                 total=tip.price * count, product_name_uz=product.name_uz,
-                                                 product_name_ru=product.name_ru)
+                                                 shop_id=shop_id, tip_id=tip_id, total=tip.price * count)
                     return {"ok": True, "cart": cart}
                 else:
                     return Response("Product topilmadi", status.HTTP_404_NOT_FOUND)

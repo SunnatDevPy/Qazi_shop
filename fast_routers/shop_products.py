@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from starlette import status
 
 from models import ShopProduct, ShopCategory, AdminPanelUser, Shop, ProductTip
+from models.products_model import LoveProducts
 from utils.details import get_products_utils, update_products
 
 shop_product_router = APIRouter(prefix='/shop-products', tags=['Shop Products'])
@@ -160,6 +161,9 @@ async def list_category_shop(operator_id: int,
         if not photo.content_type.startswith("image/"):
             return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
     if user and product:
+        if product.is_active != None:
+            await LoveProducts.update_all_active(product.id, is_active=is_active)
+
         update_data = {k: v for k, v in
                        {"category_id": category_id, "name_uz": name_uz, "photo": photo,
                         "name_ru": name_ru, "description_uz": description_uz, "description_ru": description_ru,

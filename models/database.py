@@ -119,6 +119,7 @@ class AbstractClass:
             query = query.options(selectinload(relationship))
         return (await db.execute(query)).scalars()
 
+
     @classmethod
     async def from_user_order(cls, _id, *, relationship=None):
         query = select(cls).where(cls.user_id == _id).order_by(desc(cls.id))
