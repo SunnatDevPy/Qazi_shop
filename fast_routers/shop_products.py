@@ -40,6 +40,7 @@ shop_product_router = APIRouter(prefix='/shop-products', tags=['Shop Products'])
 #     return templates.TemplateResponse(request, 'apps/products/product-list.html', context)
 
 class ProductTipSchema(BaseModel):
+    id: int
     price: int
     volume: int
     unit: str

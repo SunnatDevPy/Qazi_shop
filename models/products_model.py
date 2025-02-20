@@ -1,6 +1,6 @@
 from fastapi_storages import FileSystemStorage
 from fastapi_storages.integrations.sqlalchemy import ImageType
-from sqlalchemy import BigInteger, String, VARCHAR, ForeignKey, select
+from sqlalchemy import BigInteger, String, VARCHAR, ForeignKey, select, BIGINT
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy_file import ImageField
 
@@ -41,6 +41,7 @@ class ShopProduct(BaseModel):
     volume: Mapped[int]
     unit: Mapped[str]
     tips: Mapped[list['ProductTip']] = relationship('ProductTip', lazy='selectin', back_populates='product')
+    love_products: Mapped[list['LoveProducts']] = relationship('LoveProducts', back_populates='product')
 
     @classmethod
     async def get_products_category(cls, category_id):
@@ -64,3 +65,10 @@ class ProductTip(BaseModel):
     async def get_product_tips(cls, id_):
         query = select(cls).filter(cls.product_id == id_)
         return (await db.execute(query)).scalars().all()
+
+
+class LoveProducts(BaseModel):
+    product_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shop_products.id', ondelete='CASCADE'))
+    shop_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shops.id', ondelete='CASCADE'))
+    bot_user_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('bot_users.id', ondelete='CASCADE'))
+    product: Mapped['ShopProduct'] = relationship('ShopProduct', lazy='selectin', back_populates='love_products')

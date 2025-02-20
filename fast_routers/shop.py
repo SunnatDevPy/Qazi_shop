@@ -2,11 +2,10 @@ from typing import Optional, List
 
 from fastapi import APIRouter, File, UploadFile, Form
 from fastapi import Response
-from pydantic import BaseModel, json
-from sqlalchemy import JSON
+from pydantic import BaseModel
 from starlette import status
 
-from models import AdminPanelUser, Shop, WorkTimes
+from models import AdminPanelUser, Shop
 from utils.details import all_data
 
 shop_router = APIRouter(prefix='/shop', tags=['Shop'])
