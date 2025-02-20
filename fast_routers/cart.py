@@ -41,7 +41,7 @@ class CartModel(BaseModel):
     tip_id: int
     count: int
     product_in_cart: Optional[ProductList] = None
-    tips: Optional[ProductTipSchema] = None  # Prevent recursion
+    tip: Optional[ProductTipSchema] = None
 
 
 @cart_router.get(path='', name="Carts")
