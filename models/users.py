@@ -97,6 +97,7 @@ class Order(BaseModel):
     total_sum: Mapped[int] = mapped_column(BIGINT)
     lat: Mapped[float]
     long: Mapped[float]
+    order_items: Mapped['OrderItem'] = relationship('OrderItem', lazy='selectin', back_populates='order')
 
     @classmethod
     async def get_from_bot_user_in_type(cls, user_id, status):
@@ -112,11 +113,12 @@ class Order(BaseModel):
 class OrderItem(BaseModel):
     product_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("shop_products.id", ondelete='CASCADE'))
     order_id: Mapped[int] = mapped_column(BIGINT, ForeignKey(Order.id, ondelete='CASCADE'))
-    count: Mapped[float] = mapped_column(default=1)
+    count: Mapped[int] = mapped_column(default=1)
     volume: Mapped[int]
     unit: Mapped[str]
     price: Mapped[int]
     total: Mapped[int]
+    order: Mapped['Order'] = relationship('Order', back_populates='order_items')
 
 
 class ProjectAllStatus(BaseModel):

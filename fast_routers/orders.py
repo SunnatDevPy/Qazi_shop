@@ -14,28 +14,50 @@ from utils.details import detail_order, sum_price_carts, detail_orders_types
 order_router = APIRouter(prefix='/order', tags=['Orders'])
 
 
+class OrderItemsModel(BaseModel):
+    id: int
+    product_id: int
+    order_id: int
+    count: int
+    volume: int
+    unit: str
+    price: int
+    total: int
+
+
+class OrderModel(BaseModel):
+    id: int
+    payment: str
+    status: str
+    bot_user_id: int
+    address: str
+    shop_id: int
+    first_last_name: str
+    contact: str
+    driver_price: int
+    total_sum: int
+    lat: float
+    long: float
+    order_items: Optional[list[OrderItemsModel]] = None
+
+
 @order_router.get(path='', name="Orders")
-async def list_category_shop():
+async def list_category_shop() -> list[OrderModel]:
     orders = await Order.all()
-    return {"orders": orders}
+    return orders
 
 
 @order_router.get(path='/detail', name="Get Orders")
-async def list_category_shop(cart_id: int):
+async def list_category_shop(cart_id: int) -> OrderModel:
     order = await Order.get(cart_id)
-    if order:
-        return {'order': order}
-    else:
-        return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
+    return order
 
 
 @order_router.get(path='/from-user', name="Get Orders from User")
-async def list_category_shop(user_id: int):
-    orders = await detail_orders_types(user_id)
-    if orders:
-        return {'orders': orders}
-    else:
-        return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
+async def list_category_shop(user_id: int, shop_id: int) -> list[OrderModel]:
+    # orders = await detail_orders_types(user_id)
+    orders = await Order.get_cart_from_shop(user_id, shop_id)
+    return orders
 
 
 @order_router.get(path='/from-status', name="Get Order from Status in User")
