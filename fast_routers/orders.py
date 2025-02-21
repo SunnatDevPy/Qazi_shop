@@ -101,32 +101,35 @@ async def list_category_shop(client_id: int, shop_id: int, items: Annotated[Crea
     if user:
         if shop:
             carts: list['Cart'] = await Cart.get_cart_from_shop(client_id, shop_id)
-            try:
-                distance_km = geodesic((shop.lat, shop.long), (items.lat, items.long)).kilometers
-            except:
-                distance_km = 0
-            # sum_order = await sum_price_carts(carts)
-            # print(sum_order)
-            order = await Order.create(**items.dict(), total_sum=0, driver_price=distance_km,
-                                       shop_id=shop_id, bot_user_id=client_id)
-            order_items = []
-            for cart in carts:
-                s = await OrderItem.create(product_id=cart.product_id, order_id=order.id, count=cart.count,
-                                           volume=cart.tip.volume, unit=cart.tip.unit, price=cart.tip.price,
-                                           total=cart.total)
-                order_items.append(s)
-                await Cart.delete(cart.id)
-            message = None
-            try:
-                location = await bot.send_location(shop.order_group_id, latitude=order.lat, longitude=order.long)
-                await bot.send_message(shop.order_group_id, await detail_order(order), parse_mode="HTML",
-                                       reply_to_message_id=location.message_id)
-            except:
-                message = 'Buyurtma yaratildi lekin guruxga yuborishda hatolik'
-            return {"ok": True,
-                    "message": "Buyurtma qabul qilindi va guruxga yuborildi" if message == None else message,
-                    "order": order,
-                    "order_items": order_items}
+            if carts:
+                try:
+                    distance_km = geodesic((shop.lat, shop.long), (items.lat, items.long)).kilometers
+                except:
+                    distance_km = 0
+                # sum_order = await sum_price_carts(carts)
+                # print(sum_order)
+                order = await Order.create(**items.dict(), total_sum=0, driver_price=distance_km,
+                                           shop_id=shop_id, bot_user_id=client_id)
+                order_items = []
+                for cart in carts:
+                    s = await OrderItem.create(product_id=cart.product_id, order_id=order.id, count=cart.count,
+                                               volume=cart.tip.volume, unit=cart.tip.unit, price=cart.tip.price,
+                                               total=cart.total)
+                    order_items.append(s)
+                    await Cart.delete(cart.id)
+                message = None
+                try:
+                    location = await bot.send_location(shop.order_group_id, latitude=order.lat, longitude=order.long)
+                    await bot.send_message(shop.order_group_id, await detail_order(order), parse_mode="HTML",
+                                           reply_to_message_id=location.message_id)
+                except:
+                    message = 'Buyurtma yaratildi lekin guruxga yuborishda hatolik'
+                return {"ok": True,
+                        "message": "Buyurtma qabul qilindi va guruxga yuborildi" if message == None else message,
+                        "order": order,
+                        "order_items": order_items}
+            else:
+                return Response("Savat topilmadi", status.HTTP_404_NOT_FOUND)
         else:
             return Response("Shop topilmadi", status.HTTP_404_NOT_FOUND)
     else:
