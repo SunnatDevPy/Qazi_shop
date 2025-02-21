@@ -2,7 +2,7 @@ from models import Cart, ShopProduct, ShopCategory, Shop, \
     BotUser, OrderItem, Order, ProductTip
 
 
-def sum_price_carts(carts):
+async def sum_price_carts(carts):
     sum_ = 0
     for i in carts:
         sum_ += i.total
