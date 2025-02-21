@@ -41,6 +41,7 @@ class CartModel(BaseModel):
     shop_id: int
     tip_id: int
     count: int
+    total: int
     product_in_cart: Optional[ProductList] = None
     tip: Optional[ProductTipSchema] = None
 
