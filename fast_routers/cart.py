@@ -107,14 +107,14 @@ async def user_delete(cart_id: int):
 
 
 @cart_router.patch(path='', name="Update Cart")
-async def list_category_shop(cart_id: int, count: int, minus=None, plus=None):
-    cart = await Cart.get(cart_id)
+async def list_category_shop(cart_id: int, count: int, tip_id: int = None):
+    cart: Cart = await Cart.get(cart_id)
+    tip: ProductTip = await ProductTip.get(tip_id)
     if cart:
-        total = cart.total
-        if minus:
-            total = (cart.count - count) * cart.price
-        elif plus:
-            total = count * cart.price
+        if tip:
+            total = count * tip.price
+        else:
+            total = count * cart.tip.price
         await Cart.update(cart.id, count=count, total=total)
         return {"ok": True}
     else:
