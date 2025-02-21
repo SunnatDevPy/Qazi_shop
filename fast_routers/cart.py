@@ -6,7 +6,6 @@ from pydantic import BaseModel
 from starlette import status
 
 from models import BotUser, Cart, ProductTip, ShopProduct, Shop
-from utils.details import detail_cart, get_carts_
 
 cart_router = APIRouter(prefix='/carts', tags=['Cart'])
 

@@ -108,15 +108,15 @@ async def list_category_shop(client_id: int, shop_id: int, items: Annotated[Crea
                     distance_km = 0
                 sum_order = await sum_price_carts(carts)
                 print(sum_order)
-                order = await Order.create(**items.dict(), total_sum=0, driver_price=distance_km,
+                order = await Order.create(**items.dict(), total_sum=sum_order, driver_price=distance_km,
                                            shop_id=shop_id, bot_user_id=client_id)
                 order_items_ = []
-                # for cart in carts:
-                #     s = await OrderItem.create(product_id=cart.product_id, order_id=order.id, count=cart.count,
-                #                                volume=cart.tip.volume, unit=cart.tip.unit, price=cart.tip.price,
-                #                                total=cart.total)
-                #     order_items_.append(s)
-                #     await Cart.delete(cart.id)
+                for cart in carts:
+                    s = await OrderItem.create(product_id=cart.product_id, order_id=order.id, count=cart.count,
+                                               volume=cart.tip.volume, unit=cart.tip.unit, price=cart.tip.price,
+                                               total=cart.total)
+                    order_items_.append(s)
+                    await Cart.delete(cart.id)
                 message = None
                 try:
                     location = await bot.send_location(shop.order_group_id, latitude=order.lat, longitude=order.long)
