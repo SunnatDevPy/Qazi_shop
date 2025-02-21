@@ -97,7 +97,7 @@ class Order(BaseModel):
     total_sum: Mapped[int] = mapped_column(BIGINT)
     lat: Mapped[float]
     long: Mapped[float]
-    order_items: Mapped['OrderItem'] = relationship('OrderItem', lazy='selectin', back_populates='order')
+    order_items: Mapped[list['OrderItem']] = relationship('OrderItem', lazy='selectin', back_populates='order')
 
     @classmethod
     async def get_from_bot_user_in_type(cls, user_id, status):
