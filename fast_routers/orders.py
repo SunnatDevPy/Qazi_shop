@@ -151,7 +151,7 @@ async def list_category_shop(order_id: int, items: Annotated[UpdateOrder, Form()
 
 
 @order_router.patch(path='/canceled', name="Canceled Order")
-async def list_category_shop(user_id: int, order_id: int):
+async def list_category_shop(order_id: int):
     order = await Order.get(order_id)
     if order:
         await Order.update(order.id, status="CANCELLED")
