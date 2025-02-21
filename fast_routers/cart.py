@@ -116,10 +116,15 @@ async def list_category_shop(cart_id: int, count: int, tip_id: int = None):
     tip: ProductTip = await ProductTip.get(tip_id)
     if cart:
         if tip:
-            total = count * tip.price
+            if cart.product_id == tip.product_id:
+                total = count * tip.price
+                tip_id = tip_id
+            else:
+                return Response(f"Tip id productga {cart.product_id} tegishli emas", status.HTTP_404_NOT_FOUND)
         else:
             total = count * cart.tip.price
-        await Cart.update(cart.id, count=count, total=total)
+            tip_id = cart.tip_id
+        await Cart.update(cart.id, count=count, total=total, tip_id=tip_id)
         return {"ok": True}
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
