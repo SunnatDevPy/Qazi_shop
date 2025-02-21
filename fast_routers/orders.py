@@ -74,13 +74,13 @@ async def list_category_shop(user_id: int, status_order: str):
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
 
-@order_router.get(path='/from-shop', name="Get Cart from User in Shop")
-async def list_category_shop(user_id: int, shop_id: int):
-    orders = await detail_orders_types(user_id, shop_id)
-    if orders:
-        return {'orders': orders}
-    else:
-        return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
+# @order_router.get(path='/from-shop', name="Get Cart from User in Shop")
+# async def list_category_shop(user_id: int, shop_id: int):
+#     orders = await detail_orders_types(user_id, shop_id)
+#     if orders:
+#         return {'orders': orders}
+#     else:
+#         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
 
 class CreateOrder(BaseModel):
@@ -107,11 +107,12 @@ async def list_category_shop(client_id: int, shop_id: int, items: Annotated[Crea
             order = await Order.create(**items.dict(), total_sum=sum_order, driver_price=distance_km,
                                        shop_id=shop_id, bot_user_id=client_id)
             order_items = []
-            for i in carts:
-                s = await OrderItem.create(product_id=i.product_id, order_id=order.id, count=i.count,
-                                           volume=i.volume, unit=i.unit, price=i.price, total=i.total)
+            for cart in carts:
+                s = await OrderItem.create(product_id=cart.product_id, order_id=order.id, count=cart.count,
+                                           volume=cart.tip.volume, unit=cart.tip.unit, price=cart.tip.price,
+                                           total=cart.total)
                 order_items.append(s)
-                await Cart.delete(i.id)
+                await Cart.delete(cart.id)
             message = None
             try:
                 location = await bot.send_location(shop.order_group_id, latitude=order.lat, longitude=order.long)
