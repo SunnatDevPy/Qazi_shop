@@ -35,6 +35,7 @@ class ProductList(BaseModel):
 
 
 class CartModel(BaseModel):
+    id: int
     bot_user_id: int
     product_id: int
     shop_id: int
