@@ -69,6 +69,11 @@ class ProductTip(BaseModel):
         query = select(cls).filter(cls.product_id == id_)
         return (await db.execute(query)).scalars().all()
 
+    @classmethod
+    async def get_product_and_tip(cls, id_, tip_id):
+        query = select(cls).filter(cls.product_id == id_, cls.id == tip_id)
+        return (await db.execute(query)).scalar()
+
 
 class LoveProducts(BaseModel):
     product_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shop_products.id', ondelete='CASCADE'))

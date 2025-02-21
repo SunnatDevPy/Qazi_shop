@@ -77,7 +77,7 @@ async def list_category_shop(client_id: int,
                              count: int = Form()):
     user = await BotUser.get(client_id)
     cart = await Cart.get_cart_from_product(client_id, product_id)
-    tip = await ProductTip.get(tip_id)
+    tip = await ProductTip.get_product_and_tip(product_id, tip_id)
     product: ShopProduct = await ShopProduct.get(product_id)
     shop: Shop = await Shop.get(shop_id)
     if user:
@@ -93,7 +93,7 @@ async def list_category_shop(client_id: int,
                 else:
                     return Response("Product topilmadi", status.HTTP_404_NOT_FOUND)
             else:
-                return Response("Tip topilmadi", status.HTTP_404_NOT_FOUND)
+                return Response("Tip topilmadi yoki productga tegishli emas", status.HTTP_404_NOT_FOUND)
         else:
             return Response("Shop topilmadi", status.HTTP_404_NOT_FOUND)
     else:
