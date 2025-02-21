@@ -107,6 +107,7 @@ async def list_category_shop(client_id: int, shop_id: int, items: Annotated[Crea
             except:
                 distance_km = 0
             sum_order = await sum_price_carts(carts)
+            print(sum_order)
             order = await Order.create(**items.dict(), total_sum=sum_order, driver_price=distance_km,
                                        shop_id=shop_id, bot_user_id=client_id)
             order_items = []
