@@ -90,7 +90,7 @@ async def update_products(products):
 
 # Оптимизация корзины
 
-async def detail_order(order: Order):
+async def detail_order(order):
     order_items: list['OrderItem'] = await OrderItem.get_order_items(order.id)
     text = ''
     count = 1
