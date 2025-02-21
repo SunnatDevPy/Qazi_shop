@@ -7,9 +7,8 @@ from pydantic import BaseModel
 from starlette import status
 
 from dispatcher import bot
-from fast_routers import geolocator
-from models import BotUser, Shop, Cart, Order, OrderItem, MyAddress, AdminPanelUser
-from utils.details import detail_order, sum_price_carts, detail_orders_types
+from models import BotUser, Shop, Cart, Order, OrderItem
+from utils.details import detail_order, sum_price_carts
 
 order_router = APIRouter(prefix='/order', tags=['Orders'])
 
@@ -106,9 +105,9 @@ async def list_category_shop(client_id: int, shop_id: int, items: Annotated[Crea
                 distance_km = geodesic((shop.lat, shop.long), (items.lat, items.long)).kilometers
             except:
                 distance_km = 0
-            sum_order = await sum_price_carts(carts)
-            print(sum_order)
-            order = await Order.create(**items.dict(), total_sum=sum_order, driver_price=distance_km,
+            # sum_order = await sum_price_carts(carts)
+            # print(sum_order)
+            order = await Order.create(**items.dict(), total_sum=0, driver_price=distance_km,
                                        shop_id=shop_id, bot_user_id=client_id)
             order_items = []
             for cart in carts:
