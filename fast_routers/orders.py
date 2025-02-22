@@ -54,8 +54,8 @@ class OrderModel(BaseModel):
     total_sum: int
     lat: float
     long: float
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
     order_items: Optional[list[OrderItemsModel]] = None
     product: Optional[ProductList] = None
 
