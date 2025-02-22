@@ -8,7 +8,7 @@ from sqlalchemy import String
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy_file import ImageField
 
-from models.database import BaseModel, db
+from models.database import BaseModel, db, CreatedBaseModel
 
 
 class MainPhoto(BaseModel):
@@ -73,7 +73,7 @@ class Cart(BaseModel):
     tip: Mapped['ProductTip'] = relationship('ProductTip', lazy='selectin', back_populates='cart')
 
 
-class Order(BaseModel):
+class Order(CreatedBaseModel):
     class StatusOrder(str, Enum):
         NEW = "yangi"
         IS_GOING = "yig'ilmoqda"
@@ -119,6 +119,7 @@ class OrderItem(BaseModel):
     price: Mapped[int]
     total: Mapped[int]
     order: Mapped['Order'] = relationship('Order', back_populates='order_items')
+    product: Mapped['Product'] = relationship('Product', lazy='selectin', back_populates='order_item')
 
 
 class ProjectAllStatus(BaseModel):

@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional, Annotated
 
 from fastapi import APIRouter, Form
@@ -11,6 +12,22 @@ from models import BotUser, Shop, Cart, Order, OrderItem
 from utils.details import detail_order, sum_price_carts
 
 order_router = APIRouter(prefix='/order', tags=['Orders'])
+
+
+class ProductList(BaseModel):
+    id: int
+    name_uz: str
+    name_ru: str
+    description_uz: str
+    description_ru: str
+    owner_id: int
+    category_id: int
+    photo: str
+    shop_id: int
+    is_active: bool
+    price: int
+    volume: int
+    unit: str
 
 
 class OrderItemsModel(BaseModel):
@@ -37,7 +54,10 @@ class OrderModel(BaseModel):
     total_sum: int
     lat: float
     long: float
+    created_at: datetime
+    updated_at: datetime
     order_items: Optional[list[OrderItemsModel]] = None
+    product: Optional[ProductList] = None
 
 
 @order_router.get(path='', name="Orders")
@@ -109,7 +129,7 @@ async def list_category_shop(client_id: int, shop_id: int, items: Annotated[Crea
                 sum_order = await sum_price_carts(carts)
 
                 order = await Order.create(**items.dict(), total_sum=sum_order, driver_price=distance_km,
-                                           shop_id=shop_id, bot_user_id=client_id,  status="NEW")
+                                           shop_id=shop_id, bot_user_id=client_id, status="NEW")
                 order_items_ = []
                 for cart in carts:
                     s = await OrderItem.create(product_id=cart.product_id, order_id=order.id, count=cart.count,

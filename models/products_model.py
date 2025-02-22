@@ -44,6 +44,7 @@ class ShopProduct(BaseModel):
 
     love_products: Mapped[list['LoveProducts']] = relationship('LoveProducts', back_populates='product')
     carts: Mapped[list['Cart']] = relationship('Cart', back_populates='product_in_cart')
+    order_item: Mapped[list['OrderItem']] = relationship('OrderItem', back_populates='product')
 
     @classmethod
     async def get_products_category(cls, category_id):
