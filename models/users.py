@@ -119,7 +119,7 @@ class OrderItem(BaseModel):
     price: Mapped[int]
     total: Mapped[int]
     order: Mapped['Order'] = relationship('Order', back_populates='order_items')
-    product: Mapped['Product'] = relationship('Product', lazy='selectin', back_populates='order_item')
+    product: Mapped['ShopProduct'] = relationship('ShopProduct', lazy='selectin', back_populates='order_item')
 
 
 class ProjectAllStatus(BaseModel):
