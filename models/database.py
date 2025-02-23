@@ -4,6 +4,7 @@ from datetime import datetime
 
 from faker import Faker
 from sqlalchemy import BigInteger, delete as sqlalchemy_delete, DateTime, update as sqlalchemy_update, func, desc
+from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, AsyncAttrs
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.future import select
@@ -75,57 +76,91 @@ class AbstractClass:
 
     @classmethod
     async def create(cls, **kwargs):  # Create
-        object_ = cls(**kwargs)
-        db.add(object_)
-        await cls.commit()
-        return object_
+        try:
+            object_ = cls(**kwargs)
+            db.add(object_)
+            await cls.commit()
+            return object_
+        except DBAPIError as e:
+            await db.rollback()  # Откат транзакции
+            print(f"Ошибка базы данных: {e}")
+            return []
 
     @classmethod
     async def update(cls, id_, **kwargs):
-        query = (
-            sqlalchemy_update(cls)
-            .where(cls.id == id_)
-            .values(**kwargs)
-            .execution_options(synchronize_session="fetch")
-        )
-        await db.execute(query)
-        await cls.commit()
+        try:
+            query = (
+                sqlalchemy_update(cls)
+                .where(cls.id == id_)
+                .values(**kwargs)
+                .execution_options(synchronize_session="fetch")
+            )
+            await db.execute(query)
+            await cls.commit()
+        except DBAPIError as e:
+            await db.rollback()  # Откат транзакции
+            print(f"Ошибка базы данных: {e}")
+            return []
 
     @classmethod
     async def get(cls, _id, *, relationship=None):
-        query = select(cls).where(cls.id == _id)
-        if relationship:
-            query = query.options(selectinload(relationship))
-        return (await db.execute(query)).scalar()
+        try:
+            query = select(cls).where(cls.id == _id)
+            if relationship:
+                query = query.options(selectinload(relationship))
+            return (await db.execute(query)).scalar()
+        except DBAPIError as e:
+            await db.rollback()  # Откат транзакции
+            print(f"Ошибка базы данных: {e}")
+            return []
 
     @classmethod
     async def get_from_username(cls, user_name, *, relationship=None):
-        query = select(cls).where(cls.username == user_name)
-        if relationship:
-            query = query.options(selectinload(relationship))
-        return (await db.execute(query)).scalar()
+        try:
+            query = select(cls).where(cls.username == user_name)
+            if relationship:
+                query = query.options(selectinload(relationship))
+            return (await db.execute(query)).scalar()
+        except DBAPIError as e:
+            await db.rollback()  # Откат транзакции
+            print(f"Ошибка базы данных: {e}")
+            return []
 
     @classmethod
     async def from_user(cls, _id, *, relationship=None):
-        query = select(cls).where(cls.bot_user_id == _id).order_by(desc(cls.id))
-        if relationship:
-            query = query.options(selectinload(relationship))
-        return (await db.execute(query)).scalars()
+        try:
+            query = select(cls).where(cls.bot_user_id == _id).order_by(desc(cls.id))
+            if relationship:
+                query = query.options(selectinload(relationship))
+            return (await db.execute(query)).scalars()
+        except DBAPIError as e:
+            await db.rollback()  # Откат транзакции
+            print(f"Ошибка базы данных: {e}")
+            return []
 
     @classmethod
     async def get_shop_product_id(cls, product_id, shop_id, *, relationship=None):
-        query = select(cls).where(cls.id == product_id, cls.shop_id == shop_id).order_by(desc(cls.id))
-        if relationship:
-            query = query.options(selectinload(relationship))
-        return (await db.execute(query)).scalars()
-
+        try:
+            query = select(cls).where(cls.id == product_id, cls.shop_id == shop_id).order_by(desc(cls.id))
+            if relationship:
+                query = query.options(selectinload(relationship))
+            return (await db.execute(query)).scalars()
+        except DBAPIError as e:
+            await db.rollback()  # Откат транзакции
+            print(f"Ошибка базы данных: {e}")
+            return []
 
     @classmethod
     async def from_user_order(cls, _id, *, relationship=None):
-        query = select(cls).where(cls.user_id == _id).order_by(desc(cls.id))
-        if relationship:
-            query = query.options(selectinload(relationship))
-        return (await db.execute(query)).scalar()
+        try:
+            query = select(cls).where(cls.user_id == _id).order_by(desc(cls.id))
+            if relationship:
+                query = query.options(selectinload(relationship))
+            return (await db.execute(query)).scalar()
+        except DBAPIError as e:
+            await db.rollback()  # Откат транзакции
+            print(f"Ошибка базы данных: {e}")
+            return []
 
     @classmethod
     async def count(cls):
@@ -138,63 +173,119 @@ class AbstractClass:
 
     @classmethod
     async def delete(cls, id_):
-        query = sqlalchemy_delete(cls).where(cls.id == id_)
-        await db.execute(query)
-        await cls.commit()
+        try:
+            query = sqlalchemy_delete(cls).where(cls.id == id_)
+            await db.execute(query)
+            await cls.commit()
+        except DBAPIError as e:
+            await db.rollback()  # Откат транзакции
+            print(f"Ошибка базы данных: {e}")
+            return []
 
     @classmethod
     async def filter(cls, criteria, *, relationship=None, columns=None):
-        if columns:
-            query = select(*columns)
-        else:
-            query = select(cls)
+        try:
+            if columns:
+                query = select(*columns)
+            else:
+                query = select(cls)
 
-        query = query.where(criteria)
+            query = query.where(criteria)
 
-        if relationship:
-            query = query.options(selectinload(relationship))
-        return (await db.execute(query)).scalars()
+            if relationship:
+                query = query.options(selectinload(relationship))
+            return (await db.execute(query)).scalars()
+        except DBAPIError as e:
+            await db.rollback()  # Откат транзакции
+            print(f"Ошибка базы данных: {e}")
+            return []
 
     @classmethod
     async def all(cls):
-        return (await db.execute(select(cls))).scalars().all()
+        try:
+            return (await db.execute(select(cls))).scalars().all()
+        except DBAPIError as e:
+            await db.rollback()  # Откат транзакции
+            print(f"Ошибка базы данных: {e}")
+            return []
 
     @classmethod
     async def get_cart_from_shop(cls, user_id, shop_id):
-        return (await db.execute(select(cls).where(cls.bot_user_id == user_id, cls.shop_id == shop_id))).scalars().all()
+        try:
+            return (
+                await db.execute(select(cls).where(cls.bot_user_id == user_id, cls.shop_id == shop_id))).scalars().all()
+        except DBAPIError as e:
+            await db.rollback()  # Откат транзакции
+            print(f"Ошибка базы данных: {e}")
+            return []
 
     @classmethod
     async def get_from_shop(cls, shop_id):
-        return (await db.execute(select(cls).where(cls.shop_id == shop_id))).scalars().all()
+        try:
+            return (await db.execute(select(cls).where(cls.shop_id == shop_id))).scalars().all()
+        except DBAPIError as e:
+            await db.rollback()  # Откат транзакции
+            print(f"Ошибка базы данных: {e}")
+            return []
 
     @classmethod
     async def from_shop(cls, shop_id):
-        return (await db.execute(select(cls).where(cls.shop_id == shop_id))).scalars().all()
+        try:
+            return (await db.execute(select(cls).where(cls.shop_id == shop_id))).scalars().all()
+        except DBAPIError as e:
+            await db.rollback()  # Откат транзакции
+            print(f"Ошибка базы данных: {e}")
+            return []
 
     @classmethod
     async def get_cart_from_product(cls, user_id, product_id):
-        return (await db.execute(select(cls).where(cls.bot_user_id == user_id, cls.product_id == product_id))).scalar()
+        try:
+            return (
+                await db.execute(select(cls).where(cls.bot_user_id == user_id, cls.product_id == product_id))).scalar()
+        except DBAPIError as e:
+            await db.rollback()  # Откат транзакции
+            print(f"Ошибка базы данных: {e}")
+            return []
 
     @classmethod
     async def get_from_bot_user(cls, user_id):
-        return (await db.execute(select(cls).where(cls.bot_user_id == user_id))).scalars().all()
+        try:
+            return (await db.execute(select(cls).where(cls.bot_user_id == user_id))).scalars().all()
+        except DBAPIError as e:
+            await db.rollback()  # Откат транзакции
+            print(f"Ошибка базы данных: {e}")
+            return []
 
     @classmethod
     async def get_order_items(cls, order_id):
-        return (await db.execute(select(cls).where(cls.order_id == order_id))).scalars().all()
+        try:
+            return (await db.execute(select(cls).where(cls.order_id == order_id))).scalars().all()
+        except DBAPIError as e:
+            await db.rollback()  # Откат транзакции
+            print(f"Ошибка базы данных: {e}")
+            return []
 
     @classmethod
     async def get_from_name(cls, address):
-        return (await db.execute(select(cls).where(cls.address == address))).scalars().all()
+        try:
+            return (await db.execute(select(cls).where(cls.address == address))).scalars().all()
+        except DBAPIError as e:
+            await db.rollback()  # Откат транзакции
+            print(f"Ошибка базы данных: {e}")
+            return []
 
     @classmethod
     async def search_shops(cls, name, category_id=None):
-        if category_id:
-            return (await db.execute(
-                select(cls).where(cls.category_id == category_id, cls.name_uz.ilike(f"%{name}%")))).scalars().all()
-        else:
-            return (await db.execute(select(cls).filter(cls.name_uz.ilike(f"%{name}%")))).scalars().all()
-
+        try:
+            if category_id:
+                return (await db.execute(
+                    select(cls).where(cls.category_id == category_id, cls.name_uz.ilike(f"%{name}%")))).scalars().all()
+            else:
+                return (await db.execute(select(cls).filter(cls.name_uz.ilike(f"%{name}%")))).scalars().all()
+        except DBAPIError as e:
+            await db.rollback()  # Откат транзакции
+            print(f"Ошибка базы данных: {e}")
+            return []
     # def run_async(self, func, *args, **kwargs):
     #     return asyncio.run(func(*args, **kwargs))
 
