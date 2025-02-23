@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from starlette import status
 
 from models import BotUser, Cart, ProductTip, ShopProduct, Shop
+from utils.details import sum_price_carts
 
 cart_router = APIRouter(prefix='/carts', tags=['Cart'])
 
@@ -66,6 +67,7 @@ async def list_category_shop(bot_user_id: int) -> list[CartModel]:
 @cart_router.get(path='/from-user-shop', name="Get Cart in Shop")
 async def list_category_shop(user_id: int, shop_id: int) -> list[CartModel]:
     carts = await Cart.get_cart_from_shop(user_id, shop_id)
+    carts.sum = await sum_price_carts(carts)
     return carts
 
 
