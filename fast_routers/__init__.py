@@ -9,6 +9,5 @@ from fast_routers.shop_products import shop_product_router
 from fast_routers.shop_category import shop_category_router
 from fast_routers.admin_users import admin_user_router
 from fast_routers.shop import shop_router
-from fast_routers.websockets import websocket_router
 from fast_routers.work_times import work_router
 

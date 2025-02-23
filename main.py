@@ -7,7 +7,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from config import conf
 from fast_routers import shop_product_router, shop_category_router, main_photos_router, work_router, bot_user_router, \
-    admin_user_router, order_router, cart_router, jwt_router, shop_router, favourites_router, websocket_router
+    admin_user_router, order_router, cart_router, jwt_router, shop_router, favourites_router
 from models import db
 
 
@@ -26,7 +26,6 @@ async def lifespan(app: FastAPI):
     app.include_router(cart_router)
     app.include_router(order_router)
     app.include_router(jwt_router)
-    app.include_router(websocket_router)
     await db.create_all()
     yield
 
