@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from starlette.routing import Router
 from fastapi import FastAPI, WebSocket
 
-websocket_router = APIRouter(tags=['Websocket'])
+websocket_router = APIRouter()
 
 active_connections = set()
 
