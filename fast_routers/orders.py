@@ -5,6 +5,7 @@ from fastapi import APIRouter, Form
 from fastapi import Response
 from geopy.distance import geodesic
 from pydantic import BaseModel
+from sqlalchemy.exc import DatabaseError, DBAPIError
 from starlette import status
 
 from dispatcher import bot
@@ -127,27 +128,31 @@ async def list_category_shop(client_id: int, shop_id: int, items: Annotated[Crea
                 except:
                     distance_km = 0
                 sum_order = await sum_price_carts(carts)
-
-                order = await Order.create(**items.dict(), total_sum=sum_order, driver_price=distance_km,
-                                           shop_id=shop_id, bot_user_id=client_id, status="NEW")
-                order_items_ = []
-                for cart in carts:
-                    s = await OrderItem.create(product_id=cart.product_id, order_id=order.id, count=cart.count,
-                                               volume=cart.tip.volume, unit=cart.tip.unit, price=cart.tip.price,
-                                               total=cart.total)
-                    order_items_.append(s)
-                    await Cart.delete(cart.id)
-                message = None
                 try:
-                    location = await bot.send_location(shop.order_group_id, latitude=order.lat, longitude=order.long)
-                    await bot.send_message(shop.order_group_id, await detail_order(order), parse_mode="HTML",
-                                           reply_to_message_id=location.message_id)
-                except:
-                    message = 'Buyurtma yaratildi lekin guruxga yuborishda hatolik'
-                return {"ok": True,
-                        "message": "Buyurtma qabul qilindi va guruxga yuborildi" if message == None else message,
-                        "order": order,
-                        "order_items": order_items_}
+                    order = await Order.create(**items.dict(), total_sum=sum_order, driver_price=distance_km,
+                                               shop_id=shop_id, bot_user_id=client_id, status="NEW")
+                    order_items_ = []
+                    for cart in carts:
+                        s = await OrderItem.create(product_id=cart.product_id, order_id=order.id, count=cart.count,
+                                                   volume=cart.tip.volume, unit=cart.tip.unit, price=cart.tip.price,
+                                                   total=cart.total)
+                        order_items_.append(s)
+                        await Cart.delete(cart.id)
+                    message = None
+                    try:
+                        location = await bot.send_location(shop.order_group_id, latitude=order.lat,
+                                                           longitude=order.long)
+                        await bot.send_message(shop.order_group_id, await detail_order(order), parse_mode="HTML",
+                                               reply_to_message_id=location.message_id)
+                    except:
+                        message = 'Buyurtma yaratildi lekin guruxga yuborishda hatolik'
+                    return {"ok": True,
+                            "message": "Buyurtma qabul qilindi va guruxga yuborildi" if message == None else message,
+                            "order": order,
+                            "order_items": order_items_}
+                except DBAPIError as e:
+                    print(e)
+                    return Response("Yaratishda xatolik", status.HTTP_404_NOT_FOUND)
             else:
                 return Response("Savat topilmadi", status.HTTP_404_NOT_FOUND)
         else:
@@ -170,8 +175,15 @@ async def list_category_shop(order_id: int, items: Annotated[UpdateOrder, Form()
     order = await Order.get(order_id)
     if order:
         update_data = {k: v for k, v in items.dict().items() if v is not None}
-        await Order.update(order_id, **update_data)
-        return {"ok": True, "order": order}
+        if update_data:
+            try:
+                await Order.update(order_id, **update_data)
+                return {"ok": True, "order": order}
+            except DBAPIError as e:
+                print(e)
+                return Response("O'zgarishda xatolik", status.HTTP_404_NOT_FOUND)
+        else:
+            return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 

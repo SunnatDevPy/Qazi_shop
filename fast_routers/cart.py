@@ -3,6 +3,7 @@ from typing import Optional
 from fastapi import APIRouter, Form, HTTPException
 from fastapi import Response
 from pydantic import BaseModel
+from sqlalchemy.exc import DBAPIError
 from starlette import status
 
 from models import BotUser, Cart, ProductTip, ShopProduct, Shop
@@ -86,13 +87,16 @@ async def list_category_shop(client_id: int,
         if shop:
             if tip:
                 if product:
-                    if cart:
-                        await Cart.update(cart.id, count=count, tip_id=tip_id, total=tip.price * count)
-                        return {"ok": True, "update": cart.id}
-                    else:
-                        cart = await Cart.create(bot_user_id=user.id, product_id=product_id, count=count,
-                                                 shop_id=shop_id, tip_id=tip_id, total=tip.price * count)
-                        return {"ok": True, "create": cart}
+                    try:
+                        if cart:
+                            await Cart.update(cart.id, count=count, tip_id=tip_id, total=tip.price * count)
+                            return {"ok": True, "update": cart.id}
+                        else:
+                            cart = await Cart.create(bot_user_id=user.id, product_id=product_id, count=count,
+                                                     shop_id=shop_id, tip_id=tip_id, total=tip.price * count)
+                            return {"ok": True, "create": cart}
+                    except DBAPIError as e:
+                        return Response("Yaratishda xatolik", status.HTTP_404_NOT_FOUND)
                 else:
                     return Response("Product topilmadi", status.HTTP_404_NOT_FOUND)
             else:
@@ -119,11 +123,14 @@ async def list_category_shop(cart_id: int, count: int, tip_id: int = None):
     tip: ProductTip = await ProductTip.get(tip_id)
     if cart:
         if tip:
-            if cart.product_id == tip.product_id:
-                total = count * tip.price
-                tip_id = tip_id
-            else:
-                return Response(f"Tip id productga {cart.product_id} tegishli emas", status.HTTP_404_NOT_FOUND)
+            try:
+                if cart.product_id == tip.product_id:
+                    total = count * tip.price
+                    tip_id = tip_id
+                else:
+                    return Response(f"Tip id productga {cart.product_id} tegishli emas", status.HTTP_404_NOT_FOUND)
+            except DBAPIError as e:
+                return Response("Yaratishda xatolik", status.HTTP_404_NOT_FOUND)
         else:
             total = count * cart.tip.price
             tip_id = cart.tip_id

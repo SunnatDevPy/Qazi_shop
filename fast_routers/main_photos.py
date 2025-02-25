@@ -1,5 +1,6 @@
 from fastapi import APIRouter, UploadFile, File, Form
 from fastapi import Response
+from sqlalchemy.exc import DBAPIError
 from starlette import status
 
 from models import MainPhoto, AdminPanelUser
@@ -21,8 +22,12 @@ async def list_category_shop(operator_id: int, language: str, photo: UploadFile 
             return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
     if user:
         if user.status in ['moderator', "admin", "superuser"]:
-            await MainPhoto.create(photo=photo, language=language)
-            return {"ok": True}
+            try:
+                await MainPhoto.create(photo=photo, language=language)
+                return {"ok": True}
+            except DBAPIError as e:
+                return Response("Yaratishda xatolik", status.HTTP_404_NOT_FOUND)
+
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
     else:

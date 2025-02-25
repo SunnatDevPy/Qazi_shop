@@ -3,6 +3,7 @@ from typing import Optional, Annotated, List
 from fastapi import APIRouter, File, UploadFile, Form
 from fastapi import Response
 from pydantic import BaseModel
+from sqlalchemy.exc import DBAPIError
 from starlette import status
 
 from models import ShopProduct, ShopCategory, AdminPanelUser, Shop, ProductTip, BotUser
@@ -80,8 +81,8 @@ async def list_category_shop(product_id: int, shop_id: int, bot_user_id: int):
                     product = await LoveProducts.create(shop_id=shop_id, bot_user_id=bot_user_id, product_id=product_id,
                                                         is_active=product.is_active)
                     return {"ok": True, "product": product}
-                except Exception as e:
-                    return {"error": e}
+                except DBAPIError as e:
+                    return Response("Yaratishda xatolik", status.HTTP_404_NOT_FOUND)
             else:
                 return Response("Yaratilmadi mahsulot activ emas", status.HTTP_404_NOT_FOUND)
 

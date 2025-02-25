@@ -36,6 +36,7 @@ class AdminPanelUser(BaseModel):
     class StatusUser(str, Enum):
         ADMIN = 'admin'
         MODERATOR = 'moderator'
+        CALL_CENTER = 'call center'
 
     first_name: Mapped[str] = mapped_column(String(255), nullable=True)
     last_name: Mapped[str] = mapped_column(String(255), nullable=True)

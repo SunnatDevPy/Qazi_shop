@@ -3,6 +3,7 @@ from typing import Optional, Annotated
 from fastapi import APIRouter, Form, HTTPException
 from fastapi import Response
 from pydantic import BaseModel
+from sqlalchemy.exc import DBAPIError
 from starlette import status
 
 from models import AdminPanelUser, Shop, WorkTimes
@@ -39,8 +40,12 @@ async def list_category_shop(client_id: int,
     user = await AdminPanelUser.get(client_id)
     shop = await Shop.get(shop_id)
     if user and shop:
-        await WorkTimes.create(shop_id=shop_id, open_time=open_time, close_time=close_time, weeks=weeks)
-        return {"ok": True}
+        try:
+            await WorkTimes.create(shop_id=shop_id, open_time=open_time, close_time=close_time, weeks=weeks)
+            return {"ok": True}
+        except DBAPIError as e:
+            print(e)
+            return Response("Yaratishda yoq", status.HTTP_404_NOT_FOUND)
     else:
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
@@ -59,8 +64,15 @@ async def list_category_shop(user_id: int, shop_id: int, work_id: int, items: An
     if user.status in ["moderator", "admin", "superuser"] or user_id == shop.owner_id:
         if work:
             update_data = {k: v for k, v in items.dict().items() if v is not None}
-            await WorkTimes.update(work_id, **update_data)
-            return {"ok": True}
+            if update_data:
+                try:
+                    await WorkTimes.update(work_id, **update_data)
+                    return {"ok": True}
+                except DBAPIError as e:
+                    print(e)
+                    return Response("O'zgartirishda xatolik", status.HTTP_404_NOT_FOUND)
+            else:
+                return Response("O'zgartirish uchun malumot yoq", status.HTTP_404_NOT_FOUND)
         else:
             return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
     else:

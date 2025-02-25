@@ -3,6 +3,7 @@ from typing import Optional, Annotated, List
 from fastapi import APIRouter, File, UploadFile, Form
 from fastapi import Response
 from pydantic import BaseModel
+from sqlalchemy.exc import DBAPIError
 from starlette import status
 
 from models import ShopProduct, ShopCategory, AdminPanelUser, Shop, ProductTip
@@ -104,22 +105,25 @@ async def list_category_shop(operator_id: int,
     if user and shop:
         if category:
             if user.status in ['moderator', "admin", "superuser"] or user.id == shop.owner_id:
-                product = await ShopProduct.create(
-                    name_uz=name_uz,
-                    name_ru=name_ru,
-                    owner_id=operator_id,
-                    category_id=category_id,
-                    description_uz=description_uz,
-                    description_ru=description_ru,
-                    photo=photo,
-                    shop_id=shop_id,
-                    price=price,
-                    volume=volume,
-                    unit=unit,
-                    is_active=True
-                )
-                return {"ok": True, "id": product.id}
-
+                try:
+                    product = await ShopProduct.create(
+                        name_uz=name_uz,
+                        name_ru=name_ru,
+                        owner_id=operator_id,
+                        category_id=category_id,
+                        description_uz=description_uz,
+                        description_ru=description_ru,
+                        photo=photo,
+                        shop_id=shop_id,
+                        price=price,
+                        volume=volume,
+                        unit=unit,
+                        is_active=True
+                    )
+                    return {"ok": True, "id": product.id}
+                except DBAPIError as e:
+                    print(e)
+                    return Response("Yaratishda xatolik", status.HTTP_500_INTERNAL_SERVER_ERROR)
             else:
                 return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
         else:
@@ -174,8 +178,16 @@ async def list_category_shop(operator_id: int,
                        v is not None}
 
         if user.status in ['moderator', "admin", "superuser"] or user.id == product.owner_id:
-            await ShopProduct.update(shop_product_id, **update_data)
-            return {"ok": True}
+            if update_data:
+                try:
+                    await ShopProduct.update(shop_product_id, **update_data)
+                    return {"ok": True}
+                except DBAPIError as e:
+                    print(e)
+                    return Response("O'zgarishda xatolik", status.HTTP_404_NOT_FOUND)
+
+            else:
+                return Response("O'zgartirish uchun malumot yo'q", status.HTTP_404_NOT_FOUND)
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
     else:
@@ -235,14 +247,18 @@ async def list_category_shop(operator_id: int,
     if user:
         if product:
             if user.status in ['moderator', "admin", "superuser"]:
-                tip = await ProductTip.create(
-                    product_id=product_id,
-                    price=price,
-                    volume=volume,
-                    unit=unit,
+                try:
+                    tip = await ProductTip.create(
+                        product_id=product_id,
+                        price=price,
+                        volume=volume,
+                        unit=unit,
 
-                )
-                return {"ok": True, "tip": tip}
+                    )
+                    return {"ok": True, "tip": tip}
+                except DBAPIError as e:
+                    print(e)
+                    return Response("Yaratishda xatolik", status.HTTP_404_NOT_FOUND)
             else:
                 return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
         else:
@@ -266,8 +282,15 @@ async def list_category_shop(operator_id: int, product_tip_id: int, items: Annot
     if user and tip:
         update_data = {k: v for k, v in items.dict().items() if v is not None}
         if user.status in ['moderator', "admin", "superuser"]:
-            await ProductTip.update(product_tip_id, **update_data)
-            return {"ok": True}
+            if update_data:
+                try:
+                    await ProductTip.update(product_tip_id, **update_data)
+                    return {"ok": True}
+                except DBAPIError as e:
+                    print(e)
+                    return Response("O'zgartirishda xatolik", status.HTTP_404_NOT_FOUND)
+            else:
+                return Response("O'zgartirish uchun malumot yoq", status.HTTP_404_NOT_FOUND)
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
     else:
