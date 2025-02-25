@@ -44,9 +44,9 @@ class AsyncDatabaseSession:
         async with self._engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
 
-    async def drop_all(self):
-        async with self._engine.begin() as conn:
-            await conn.run_sync(Base.metadata.drop_all)
+    # async def drop_all(self):
+    #     async with self._engine.begin() as conn:
+    #         await conn.run_sync(Base.metadata.drop_all)
 
 
 db = AsyncDatabaseSession()
@@ -61,15 +61,21 @@ class AbstractClass:
             await db.commit()
         except DBAPIError as e:
             await db.rollback()
-            logging.error(f"Ошибка при коммите: {e}")
+            logging.error(f"Kommit qilinganda hatolik: {e}")
             raise
 
     @classmethod
     async def create(cls, **kwargs):  # Create
         object_ = cls(**kwargs)
         db.add(object_)
-        await cls.commit()
-        return object_
+        # await cls.commit()
+        # return object_
+        try:
+            await cls.commit()
+        except Exception as e:
+            await db.rollback()
+            print(f"Ошибка при создании объекта {cls.__name__}: {e}")
+            return None
 
     @classmethod
     async def update(cls, id_, **kwargs):
@@ -80,7 +86,14 @@ class AbstractClass:
             .execution_options(synchronize_session="fetch")
         )
         await db.execute(query)
-        await cls.commit()
+        try:
+            await cls.commit()
+        except Exception as e:
+            await db.rollback()
+            print(f"Ошибка при создании объекта {cls.__name__}: {e}")
+            return None
+
+        # await cls.commit()
 
     @classmethod
     async def get(cls, _id, *, relationship=None):
