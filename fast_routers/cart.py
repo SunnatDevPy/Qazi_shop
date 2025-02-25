@@ -17,6 +17,7 @@ class ProductTipSchema(BaseModel):
     price: int
     volume: int
     unit: str
+    product_id: int
 
 
 class ProductList(BaseModel):
