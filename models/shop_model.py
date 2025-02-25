@@ -44,3 +44,7 @@ class WorkTimes(BaseModel):
     close_time: Mapped[str]
     weeks: Mapped[list] = mapped_column(JSON)
     shop: Mapped[list['Shop']] = relationship('Shop', lazy='selectin', back_populates='work')
+
+
+class CallCenters(BaseModel):
+    pass

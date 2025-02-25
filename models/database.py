@@ -1,10 +1,7 @@
-import logging
 from _ctypes_test import func
 from datetime import datetime
 
-from faker import Faker
 from sqlalchemy import BigInteger, delete as sqlalchemy_delete, DateTime, update as sqlalchemy_update, func, desc
-from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, AsyncAttrs
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.future import select
@@ -39,7 +36,7 @@ class AsyncDatabaseSession:
 
     def init(self):
         self._engine = create_async_engine(conf.db.db_url)
-        self._session = sessionmaker(self._engine, expire_on_commit=False, class_=AsyncSession)()
+        self._session = sessionmaker(self._engine, class_=AsyncSession)()
 
     async def create_all(self):
         async with self._engine.begin() as conn:
@@ -48,16 +45,6 @@ class AsyncDatabaseSession:
     async def drop_all(self):
         async with self._engine.begin() as conn:
             await conn.run_sync(Base.metadata.drop_all)
-
-    # async def execute(self, stmt):
-    #     try:
-    #         result = await self._session.execute(stmt)
-    #         await self._session.commit()
-    #         return result
-    #     except Exception as e:
-    #         logging.error(f"Ошибка SQLAlchemy: {e}")
-    #         await self._session.rollback()
-    #         raise
 
 
 db = AsyncDatabaseSession()

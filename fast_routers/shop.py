@@ -174,7 +174,7 @@ async def list_category_shop(operator_id: int,
                     return {"ok": True, "shop": shop}
                 except DBAPIError as e:
                     print(e)
-                    return Response("O'zgarishda hatolik", status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    return Response(f"O'zgarishda hatolik: {e}", status.HTTP_500_INTERNAL_SERVER_ERROR)
             else:
                 return Response("O'zgarishda malumot yoq", status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:

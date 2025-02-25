@@ -125,3 +125,5 @@ class OrderItem(BaseModel):
 
 class ProjectAllStatus(BaseModel):
     day_and_night: Mapped[bool] = mapped_column(Boolean, default=False)
+
+
