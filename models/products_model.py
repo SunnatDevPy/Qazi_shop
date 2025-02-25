@@ -34,7 +34,7 @@ class ShopProduct(BaseModel):
     description_ru: Mapped[str] = mapped_column(String(255))
     owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('admin_panel_users.id', ondelete='CASCADE'))
     category_id: Mapped[int] = mapped_column(BigInteger, ForeignKey(ShopCategory.id, ondelete='CASCADE'))
-    photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/')))
+    photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/')), nullable=True)
     shop_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shops.id', ondelete='CASCADE'))
     is_active: Mapped[bool]
     price: Mapped[int] = mapped_column(BigInteger)
