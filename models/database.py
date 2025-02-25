@@ -1,7 +1,9 @@
+import logging
 from _ctypes_test import func
 from datetime import datetime
 
 from sqlalchemy import BigInteger, delete as sqlalchemy_delete, DateTime, update as sqlalchemy_update, func, desc
+from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, AsyncAttrs
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.future import select
@@ -57,9 +59,10 @@ class AbstractClass:
     async def commit():
         try:
             await db.commit()
-        except Exception as e:
-            print(e)
+        except DBAPIError as e:
             await db.rollback()
+            logging.error(f"Ошибка при коммите: {e}")
+            raise
 
     @classmethod
     async def create(cls, **kwargs):  # Create
