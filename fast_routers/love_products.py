@@ -78,9 +78,10 @@ async def list_category_shop(product_id: int, shop_id: int, bot_user_id: int):
         if product:
             if product.is_active:
                 try:
-                    product = await LoveProducts.create(shop_id=shop_id, bot_user_id=bot_user_id, product_id=product_id,
-                                                        is_active=product.is_active)
-                    return {"ok": True, "product": product}
+                    products = await LoveProducts.create(shop_id=shop_id, bot_user_id=bot_user_id,
+                                                         product_id=product_id,
+                                                         is_active=product.is_active)
+                    return {"ok": True, "product": products}
                 except DBAPIError as e:
                     return Response("Yaratishda xatolik", status.HTTP_404_NOT_FOUND)
             else:

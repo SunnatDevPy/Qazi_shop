@@ -59,9 +59,9 @@ class AbstractClass:
     async def commit():
         try:
             await db.commit()
-        except DBAPIError as e:
+        except Exception as e:
             await db.rollback()
-            logging.error(f"Kommit qilinganda hatolik: {e}")
+            print(e)
             raise
 
     @classmethod
