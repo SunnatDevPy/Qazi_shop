@@ -68,14 +68,8 @@ class AbstractClass:
     async def create(cls, **kwargs):  # Create
         object_ = cls(**kwargs)
         db.add(object_)
-        # await cls.commit()
-        # return object_
-        try:
-            await cls.commit()
-        except Exception as e:
-            await db.rollback()
-            print(f"Ошибка при создании объекта {cls.__name__}: {e}")
-            return None
+        await cls.commit()
+        return object_
 
     @classmethod
     async def update(cls, id_, **kwargs):
