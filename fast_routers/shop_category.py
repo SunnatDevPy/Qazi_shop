@@ -11,15 +11,6 @@ from models import AdminPanelUser, ShopCategory, Shop
 shop_category_router = APIRouter(prefix='/shop-categories', tags=['Shop Categories'])
 
 
-class ListCategories(BaseModel):
-    id: int
-    name_uz: Optional[str] = None
-    name_ru: Optional[str] = None
-    shop_id: int
-    parent_id: Optional[int] = None
-    is_active: Optional[bool] = None
-
-
 @shop_category_router.get(path='', name="Categories")
 async def list_category_shop():
     categories = await ShopCategory.all()

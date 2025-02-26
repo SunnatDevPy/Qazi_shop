@@ -8,42 +8,10 @@ from starlette import status
 
 from models import ShopProduct, ShopCategory, AdminPanelUser, Shop, ProductTip, BotUser
 from models.products_model import LoveProducts
+from utils import FavouritesSchema
 from utils.details import get_products_utils, update_products
 
 favourites_router = APIRouter(prefix='/favourites-products', tags=['Favourites'])
-
-
-class ProductTipSchema(BaseModel):
-    id: int
-    price: int
-    volume: int
-    unit: str
-
-
-class ProductList(BaseModel):
-    id: int
-    name_uz: str
-    name_ru: str
-    description_uz: str
-    description_ru: str
-    owner_id: int
-    category_id: int
-    photo: str
-    shop_id: int
-    is_active: bool
-    price: int
-    volume: int
-    unit: str
-    tips: Optional[List[ProductTipSchema]] = None  # Prevent recursion
-
-
-class FavouritesSchema(BaseModel):
-    id: int
-    product_id: int
-    shop_id: int
-    bot_user_id: int
-    product: Optional[ProductList] = None
-    is_active: Optional[bool] = None
 
 
 @favourites_router.get(path='', name="Get All Favourites")

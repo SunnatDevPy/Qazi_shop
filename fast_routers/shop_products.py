@@ -8,16 +8,10 @@ from starlette import status
 
 from models import ShopProduct, ShopCategory, AdminPanelUser, Shop, ProductTip
 from models.products_model import LoveProducts
+from utils import ProductList
 from utils.details import get_products_utils, update_products
 
 shop_product_router = APIRouter(prefix='/shop-products', tags=['Shop Products'])
-
-
-# @product_router.post("/")
-# async def read_item(request: Request):
-#     data = await request.form()
-#     await Product.create(**data)
-#     return RedirectResponse('/products')
 
 
 # @product_router.get("/", name='product_list')
@@ -40,33 +34,6 @@ shop_product_router = APIRouter(prefix='/shop-products', tags=['Shop Products'])
 #         'categories': categories
 #     }
 #     return templates.TemplateResponse(request, 'apps/products/product-list.html', context)
-
-class ProductTipSchema(BaseModel):
-    id: int
-    price: int
-    volume: int
-    unit: str
-
-
-class ProductList(BaseModel):
-    id: int
-    name_uz: str
-    name_ru: str
-    description_uz: str
-    description_ru: str
-    owner_id: int
-    category_id: int
-    photo: str
-    shop_id: int
-    is_active: bool
-    price: int
-    volume: int
-    unit: str
-    tips: Optional[List[ProductTipSchema]] = None  # Prevent recursion
-
-    class Config:
-        from_attributes = True
-        exclude_unset = True
 
 
 @shop_product_router.get(path='', name="Get All Products")

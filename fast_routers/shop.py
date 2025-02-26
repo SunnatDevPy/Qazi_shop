@@ -1,72 +1,13 @@
-from typing import Optional, List
-
 from fastapi import APIRouter, File, UploadFile, Form
 from fastapi import Response
-from pydantic import BaseModel
 from sqlalchemy.exc import DBAPIError
 from starlette import status
 
 from models import AdminPanelUser, Shop
+from utils import ListShopsModel
 from utils.details import all_data
 
 shop_router = APIRouter(prefix='/shop', tags=['Shop'])
-
-
-class WorkModel(BaseModel):
-    id: int
-    shop_id: int
-    open_time: str
-    close_time: str
-    weeks: list
-
-
-class ListShopsModel(BaseModel):
-    id: Optional[int]
-    owner_id: Optional[int]
-    name_uz: Optional[str]
-    name_ru: Optional[str]
-    work_status: Optional[str]
-    lat: Optional[float]
-    long: Optional[float]
-    district_uz: Optional[str] = None
-    district_ru: Optional[str] = None
-    address_uz: Optional[str] = None
-    address_ru: Optional[str] = None
-    order_group_id: Optional[int] = None
-    cart_number: Optional[int] = None
-    photo: Optional[str] = None
-    is_active: Optional[bool] = None
-    work: Optional[List[WorkModel]] = None
-
-
-class UpdateShopsModel(BaseModel):
-    owner_id: Optional[int] = None
-    name: Optional[str]
-    work_status: Optional[str]
-    district_uz: Optional[str] = None
-    district_ru: Optional[str] = None
-    address_uz: Optional[str] = None
-    address_ru: Optional[str] = None
-    lat: Optional[float]
-    long: Optional[float]
-    order_group_id: Optional[int] = None
-    cart_number: Optional[str] = None
-    photo: Optional[str] = None
-
-
-class CreateShopsModel(BaseModel):
-    owner_id: Optional[int] = None
-    name: Optional[str] = None
-    work_status: Optional[str]
-    district_uz: Optional[str] = None
-    district_ru: Optional[str] = None
-    address_uz: Optional[str] = None
-    address_ru: Optional[str] = None
-    lat: Optional[float] = None
-    long: Optional[float] = None
-    order_group_id: Optional[int] = None
-    cart_number: Optional[str] = None
-    photo: Optional[str] = None
 
 
 @shop_router.get(path='', name="Shops")

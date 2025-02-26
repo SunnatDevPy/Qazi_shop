@@ -7,7 +7,6 @@ from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer
 from icecream import icecream
 from jose import JWTError
-
 from passlib.context import CryptContext
 from passlib.exc import InvalidTokenError
 from pydantic import BaseModel
@@ -58,6 +57,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
+
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], admin=False):
     try:

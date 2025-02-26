@@ -1,64 +1,18 @@
-from datetime import datetime
 from typing import Optional, Annotated
 
 from fastapi import APIRouter, Form
 from fastapi import Response
 from geopy.distance import geodesic
 from pydantic import BaseModel
-from sqlalchemy.exc import DatabaseError, DBAPIError
+from sqlalchemy.exc import DBAPIError
 from starlette import status
 
 from dispatcher import bot
 from models import BotUser, Shop, Cart, Order, OrderItem
+from utils import OrderModel
 from utils.details import detail_order, sum_price_carts
 
 order_router = APIRouter(prefix='/order', tags=['Orders'])
-
-
-class ProductList(BaseModel):
-    id: int
-    name_uz: str
-    name_ru: str
-    description_uz: str
-    description_ru: str
-    owner_id: int
-    category_id: int
-    photo: str
-    shop_id: int
-    is_active: bool
-    price: int
-    volume: int
-    unit: str
-
-
-class OrderItemsModel(BaseModel):
-    id: int
-    product_id: int
-    order_id: int
-    count: int
-    volume: int
-    unit: str
-    price: int
-    total: int
-
-
-class OrderModel(BaseModel):
-    id: int
-    payment: str
-    status: str
-    bot_user_id: int
-    address: str
-    shop_id: int
-    first_last_name: str
-    contact: str
-    driver_price: int
-    total_sum: int
-    lat: float
-    long: float
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
-    order_items: Optional[list[OrderItemsModel]] = None
-    product: Optional[ProductList] = None
 
 
 @order_router.get(path='', name="Orders")

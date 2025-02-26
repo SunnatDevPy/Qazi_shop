@@ -2,50 +2,14 @@ from typing import Optional
 
 from fastapi import APIRouter, Form, HTTPException
 from fastapi import Response
-from pydantic import BaseModel
 from sqlalchemy.exc import DBAPIError
 from starlette import status
 
 from models import BotUser, Cart, ProductTip, ShopProduct, Shop
+from utils import CartModel
 from utils.details import sum_price_carts
 
 cart_router = APIRouter(prefix='/carts', tags=['Cart'])
-
-
-class ProductTipSchema(BaseModel):
-    id: int
-    price: int
-    volume: int
-    unit: str
-    product_id: int
-
-
-class ProductList(BaseModel):
-    id: int
-    name_uz: str
-    name_ru: str
-    description_uz: str
-    description_ru: str
-    owner_id: int
-    category_id: int
-    photo: str
-    shop_id: int
-    is_active: bool
-    price: int
-    volume: int
-    unit: str
-
-
-class CartModel(BaseModel):
-    id: int
-    bot_user_id: int
-    product_id: int
-    shop_id: int
-    tip_id: int
-    count: int
-    total: int
-    product_in_cart: Optional[ProductList] = None
-    tip: Optional[ProductTipSchema] = None
 
 
 @cart_router.get(path='', name="Carts")
