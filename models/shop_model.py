@@ -47,4 +47,5 @@ class WorkTimes(BaseModel):
 
 
 class CallCenters(BaseModel):
-    pass
+    shop_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shops.id', ondelete='CASCADE'))
+    contact: Mapped[str]
