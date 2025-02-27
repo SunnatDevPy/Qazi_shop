@@ -15,15 +15,21 @@ async def list_category_shop():
 
 
 @main_photos_router.post(path='', name="Create Banner Photo")
-async def list_category_shop(operator_id: int, language: str, photo: UploadFile = File()):
+async def list_category_shop(operator_id: int, language: str, photo: UploadFile = File(default=None),
+                             video: UploadFile = File(default=None)):
     user: AdminPanelUser = await AdminPanelUser.get(operator_id)
     if photo:
         if not photo.content_type.startswith("image/"):
             return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
+
+    if video:
+        if not video.content_type.startswith("video/"):
+            return Response("Fayl video bo'lishi kerak", status.HTTP_400_BAD_REQUEST)
+
     if user:
         if user.status in ['moderator', "admin", "superuser"]:
             try:
-                await MainPhoto.create(photo=photo, language=language)
+                await MainPhoto.create(photo=photo, language=language, video=video)
                 return {"ok": True}
             except DBAPIError as e:
                 return Response("Yaratishda xatolik", status.HTTP_404_NOT_FOUND)

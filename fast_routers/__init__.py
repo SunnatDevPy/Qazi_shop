@@ -1,6 +1,7 @@
 from fast_routers.bot_users import bot_user_router
 from fast_routers.cart import cart_router
 from fast_routers.contacts import contact_router
+from fast_routers.excel_save import excel_router
 from fast_routers.geopy_project import geolocator
 from fast_routers.jwt_ import jwt_router
 from fast_routers.love_products import favourites_router

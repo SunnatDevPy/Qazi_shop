@@ -6,7 +6,7 @@ from sqlalchemy import Boolean, select, desc
 from sqlalchemy import ForeignKey, BIGINT, Enum as SqlEnum
 from sqlalchemy import String
 from sqlalchemy.orm import mapped_column, Mapped, relationship
-from sqlalchemy_file import ImageField
+from sqlalchemy_file import ImageField, FileField
 
 from models.database import BaseModel, db, CreatedBaseModel
 
@@ -16,7 +16,8 @@ class MainPhoto(BaseModel):
         UZ = 'uz'
         RU = 'ru'
 
-    photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/')))
+    photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/')), nullable=True)
+    video: Mapped[FileField] = mapped_column(ImageType(storage=FileSystemStorage('media/')), nullable=True)
     language: Mapped[str] = mapped_column(SqlEnum(LanguageBanner), nullable=True)
 
 
@@ -125,5 +126,3 @@ class OrderItem(BaseModel):
 
 class ProjectAllStatus(BaseModel):
     day_and_night: Mapped[bool] = mapped_column(Boolean, default=False)
-
-
