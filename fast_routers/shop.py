@@ -47,20 +47,15 @@ async def list_category_shop(owner_id: int,
     user: AdminPanelUser = await AdminPanelUser.get(owner_id)
     if user:
         if user.status in ['moderator', "admin", "superuser"]:
-            try:
-                shop = await Shop.create(owner_id=owner_id, name_uz=name_uz,
-                                         name_ru=name_ru,
-                                         district_uz=district_uz,
-                                         address_uz=address_uz,
-                                         address_ru=address_ru,
-                                         district_ru=district_ru, lat=lat, long=long,
-                                         photo=photo, work_status='CLOSE', is_active=is_active,
-                                         order_group_id=order_group_id, cart_number=cart_number)
-            except DBAPIError as e:
-                print(e)
-                return Response("Yaratishda hatolik", status.HTTP_404_NOT_FOUND)
-
-            return {"ok": True, "shop_id": shop.id}
+            shop = await Shop.create(owner_id=owner_id, name_uz=name_uz,
+                                     name_ru=name_ru,
+                                     district_uz=district_uz,
+                                     address_uz=address_uz,
+                                     address_ru=address_ru,
+                                     district_ru=district_ru, lat=lat, long=long,
+                                     photo=photo, work_status='CLOSE', is_active=is_active,
+                                     order_group_id=order_group_id, cart_number=cart_number)
+            return {"ok": True, "shop": shop}
         else:
             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
     else:

@@ -60,9 +60,8 @@ class AbstractClass:
         try:
             await db.commit()
         except Exception as e:
-            await db.rollback()
             print(e)
-            raise
+            await db.rollback()
 
     @classmethod
     async def create(cls, **kwargs):  # Create
@@ -143,7 +142,7 @@ class AbstractClass:
         await cls.commit()
 
     @classmethod
-    async def filter(cls, criteria, *, relationship=None, columns=None):
+    async def filters(cls, criteria, *, relationship=None, columns=None):
         if columns:
             query = select(*columns)
         else:
@@ -154,6 +153,19 @@ class AbstractClass:
         if relationship:
             query = query.options(selectinload(relationship))
         return (await db.execute(query)).scalars()
+
+    @classmethod
+    async def filter(cls, criteria, *, relationship=None, columns=None):
+        if columns:
+            query = select(*columns)
+        else:
+            query = select(cls)
+
+        query = query.where(criteria)
+
+        if relationship:
+            query = query.options(selectinload(relationship))
+        return (await db.execute(query)).scalar()
 
     @classmethod
     async def all(cls):
@@ -177,12 +189,10 @@ class AbstractClass:
 
     @classmethod
     async def get_from_bot_user(cls, user_id):
-
         return (await db.execute(select(cls).where(cls.bot_user_id == user_id))).scalars().all()
 
     @classmethod
     async def get_order_items(cls, order_id):
-
         return (await db.execute(select(cls).where(cls.order_id == order_id))).scalars().all()
 
     @classmethod
@@ -191,21 +201,21 @@ class AbstractClass:
 
     @classmethod
     async def search_shops(cls, name, category_id=None):
-
         if category_id:
             return (await db.execute(
                 select(cls).where(cls.category_id == category_id, cls.name_uz.ilike(f"%{name}%")))).scalars().all()
         else:
             return (await db.execute(select(cls).filter(cls.name_uz.ilike(f"%{name}%")))).scalars().all()
 
-    # def run_async(self, func, *args, **kwargs):
-    #     return asyncio.run(func(*args, **kwargs))
 
-    # def convert_uzs(self, amount: int):
-    #     return amount * current_price
-    #
-    # def convert_usd(self, amount: int):
-    #     return amount // current_price
+# def run_async(self, func, *args, **kwargs):
+#     return asyncio.run(func(*args, **kwargs))
+
+# def convert_uzs(self, amount: int):
+#     return amount * current_price
+#
+# def convert_usd(self, amount: int):
+#     return amount // current_price
 
 
 class BaseModel(Base, AbstractClass):

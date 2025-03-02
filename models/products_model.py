@@ -1,6 +1,6 @@
 from fastapi_storages import FileSystemStorage
 from fastapi_storages.integrations.sqlalchemy import ImageType
-from sqlalchemy import BigInteger, String, VARCHAR, ForeignKey, select, BIGINT, desc, update as sqlalchemy_update
+from sqlalchemy import BigInteger, String, VARCHAR, ForeignKey, select, BIGINT, update as sqlalchemy_update
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy_file import ImageField
 
@@ -45,6 +45,7 @@ class ShopProduct(BaseModel):
     love_products: Mapped[list['LoveProducts']] = relationship('LoveProducts', back_populates='product')
     carts: Mapped[list['Cart']] = relationship('Cart', back_populates='product_in_cart')
     order_item: Mapped[list['OrderItem']] = relationship('OrderItem', back_populates='product')
+    call_order_item: Mapped['CallOrderItem'] = relationship('CallOrderItem', lazy='selectin', back_populates='product')
 
     @classmethod
     async def get_products_category(cls, category_id):

@@ -28,7 +28,7 @@ class UserList(BaseModel):
     username: Optional[str] = None
     contact: Optional[str] = None
     is_active: Optional[bool] = False
-    status: Optional[str] = "moderator"
+    status: Optional[str] = None
     day_and_night: Optional[bool] = False
 
 
@@ -128,6 +128,7 @@ async def login(items: Annotated[UserLogin, Form()]) -> UserList:
     else:
         raise HTTPException(status_code=404, detail="parol yoki usernameda hatolik")
 
+
 class Register(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
@@ -141,9 +142,9 @@ def hash_password(password: str) -> str:
 
 
 @admin_user_router.post(path='/register', name="Register")
-async def register(items: Annotated[Register, Form()]) -> UserList:
+async def register(items: Annotated[Register, Form()]):
     items.password = hash_password(items.password)
-    user = await AdminPanelUser.get_from_username(items.username)
+    user: AdminPanelUser = await AdminPanelUser.filter(AdminPanelUser.username == items.username)
     if user:
         raise HTTPException(status_code=404, detail="Bunday username bor")
     else:

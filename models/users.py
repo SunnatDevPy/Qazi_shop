@@ -51,11 +51,6 @@ class AdminPanelUser(BaseModel):
     def __str__(self):
         return super().__str__() + f" - {self.username}"
 
-    @classmethod
-    async def get_from_username(cls, username):
-        query = select(cls).order_by(desc(cls.id)).filter(cls.username == username)
-        return (await db.execute(query)).scalar()
-
 
 class MyAddress(BaseModel):
     bot_user_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("bot_users.id", ondelete='CASCADE'))
@@ -167,11 +162,11 @@ class CallOrder(CreatedBaseModel):
 
 class CallOrderItem(BaseModel):
     product_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("shop_products.id", ondelete='CASCADE'))
-    order_id: Mapped[int] = mapped_column(BIGINT, ForeignKey(Order.id, ondelete='CASCADE'))
+    order_id: Mapped[int] = mapped_column(BIGINT, ForeignKey(CallOrder.id, ondelete='CASCADE'))
     count: Mapped[int] = mapped_column(default=1)
     volume: Mapped[int]
     unit: Mapped[str]
     price: Mapped[int]
     total: Mapped[int]
     order: Mapped['CallOrder'] = relationship('CallOrder', back_populates='order_items')
-    product: Mapped['ShopProduct'] = relationship('ShopProduct', lazy='selectin', back_populates='order_item')
+    product: Mapped['ShopProduct'] = relationship('ShopProduct', lazy='selectin', back_populates='call_order_item')
