@@ -138,6 +138,7 @@ class CallOrder(CreatedBaseModel):
     payment: Mapped[bool] = mapped_column(SqlEnum(Payment), default=Payment.CASH.value)
     status: Mapped[str] = mapped_column(SqlEnum(StatusOrder))
 
+    bot_user_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('bot_users.id', ondelete='CASCADE'))
     call_user_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('admin_panel_users.id', ondelete='CASCADE'))
     address: Mapped[str] = mapped_column(String)
     shop_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('shops.id', ondelete="CASCADE"))

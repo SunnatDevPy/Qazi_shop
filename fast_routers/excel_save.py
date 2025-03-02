@@ -86,7 +86,7 @@ async def upload_excel(operator_id: int, excel_file: UploadFile = File(...)):
     }
 
 
-@excel_router.patch(path='/tips', name="Create or Update Product tips")
+@excel_router.post(path='/tips', name="Create or Update Product tips")
 async def list_category_shop(operator_id: int, excel_file: UploadFile = File()):
     user: AdminPanelUser = await AdminPanelUser.get(operator_id)
     if user is None:
