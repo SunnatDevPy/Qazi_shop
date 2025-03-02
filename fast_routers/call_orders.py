@@ -93,7 +93,7 @@ class CreateOrder(BaseModel):
     contact: str
     address: str
     first_last_name: str
-    items: List[OrderItemSchema]
+    order_items: List[OrderItemSchema]
 
 
 @call_order_router.post(path='', name="Create Call Order from User")
