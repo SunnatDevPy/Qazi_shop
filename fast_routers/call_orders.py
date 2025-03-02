@@ -176,12 +176,12 @@ async def list_category_shop(call_order_id: int, items: Annotated[UpdateOrder, F
                             "DELIVERED", "yetkazildi",
                             "CANCELLED", "bekor qilindi"]:
         return Response("Buyurtmaga notog'ri status berilgan", status.HTTP_404_NOT_FOUND)
-    order = await CallOrder.get(order_id)
+    order = await CallOrder.get(call_order_id)
     if order:
         update_data = {k: v for k, v in items.dict().items() if v is not None}
         if update_data:
             try:
-                await CallOrder.update(order_id, **update_data)
+                await CallOrder.update(call_order_id, **update_data)
                 return {"ok": True, "order": order}
             except DBAPIError as e:
                 print(e)
