@@ -22,14 +22,13 @@ async def list_category_shop() -> list[OrderModel]:
 
 
 @order_router.get(path='/detail', name="Get Orders")
-async def list_category_shop(cart_id: int) -> OrderModel:
-    order = await Order.get(cart_id)
+async def list_category_shop(order_id: int) -> OrderModel:
+    order = await Order.get(order_id)
     return order
 
 
 @order_router.get(path='/from-user', name="Get Orders from User")
 async def list_category_shop(user_id: int, shop_id: int) -> list[OrderModel]:
-    # orders = await detail_orders_types(user_id)
     orders = await Order.get_cart_from_shop(user_id, shop_id)
     return orders
 
@@ -41,7 +40,7 @@ async def list_category_shop(user_id: int, status_order: str):
                             "DELIVERED", "yetkazildi",
                             "CANCELLED", "bekor qilindi"]:
         return Response("Buyurtmaga notog'ri status berilgan", status.HTTP_404_NOT_FOUND)
-    orders = await Order.get_from_bot_user_in_type(user_id, type)
+    orders = await Order.get_from_bot_user_in_type(user_id, status_order)
     if orders:
         return {'orders': orders}
     else:
@@ -99,7 +98,13 @@ async def list_category_shop(client_id: int, shop_id: int, items: Annotated[Crea
                         await bot.send_message(shop.order_group_id, await detail_order(order), parse_mode="HTML",
                                                reply_to_message_id=location.message_id)
                     except:
-                        message = 'Buyurtma yaratildi lekin guruxga yuborishda hatolik'
+                        try:
+                            location = await bot.send_location(279361769, latitude=order.lat,
+                                                               longitude=order.long)
+                            await bot.send_message(279361769, await detail_order(order), parse_mode="HTML",
+                                                   reply_to_message_id=location.message_id)
+                        except:
+                            message = 'Buyurtma yaratildi lekin guruxga yuborishda hatolik'
                     return {"ok": True,
                             "message": "Buyurtma qabul qilindi va guruxga yuborildi" if message == None else message,
                             "order": order,

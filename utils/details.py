@@ -124,3 +124,8 @@ async def all_data():
         i.category = product
         shop.append(i)
     return shop
+
+
+async def tips_model(tips: list):
+    for i in tips:
+        pass

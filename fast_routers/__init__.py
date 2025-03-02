@@ -1,4 +1,5 @@
 from fast_routers.bot_users import bot_user_router
+from fast_routers.call_orders import call_order_router
 from fast_routers.cart import cart_router
 from fast_routers.contacts import contact_router
 from fast_routers.excel_save import excel_router
