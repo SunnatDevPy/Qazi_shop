@@ -1,7 +1,7 @@
 from enum import Enum
 
 from fastapi_storages import FileSystemStorage
-from fastapi_storages.integrations.sqlalchemy import ImageType
+from fastapi_storages.integrations.sqlalchemy import ImageType, FileType
 from sqlalchemy import Boolean, select, desc
 from sqlalchemy import ForeignKey, BIGINT, Enum as SqlEnum
 from sqlalchemy import String
@@ -17,7 +17,7 @@ class MainPhoto(BaseModel):
         RU = 'ru'
 
     photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/')), nullable=True)
-    video: Mapped[FileField] = mapped_column(ImageType(storage=FileSystemStorage('media/')), nullable=True)
+    video: Mapped[FileField] = mapped_column(FileType(storage=FileSystemStorage('media/')), nullable=True)
     language: Mapped[str] = mapped_column(SqlEnum(LanguageBanner), nullable=True)
 
 
