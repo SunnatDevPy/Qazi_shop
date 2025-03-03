@@ -142,11 +142,11 @@ def hash_password(password: str) -> str:
 
 
 @admin_user_router.post(path='/register', name="Register")
-async def register(items: Annotated[Register, Form()]):
+async def register(items: Annotated[Register, Form()]) -> UserList:
     items.password = hash_password(items.password)
     user: AdminPanelUser = await AdminPanelUser.filter(AdminPanelUser.username == items.username)
     if user:
         raise HTTPException(status_code=404, detail="Bunday username bor")
     else:
-        user = await AdminPanelUser.create(**items.dict(), status="moderator", day_and_night=False, is_active=False)
-        return user
+        users = await AdminPanelUser.create(**items.dict(), status="moderator", day_and_night=False, is_active=False)
+        return users
