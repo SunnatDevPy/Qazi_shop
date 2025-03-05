@@ -15,7 +15,7 @@ from starlette import status
 from models import BotUser, AdminPanelUser
 
 SECRET_KEY = "selectstalker"
-ALGORITHM = "SHA256"
+ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 480
 REFRESH_TOKEN_EXPIRE_DAYS = 100
 
