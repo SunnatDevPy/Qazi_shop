@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Form
 from fastapi.params import Depends
 from pydantic import BaseModel
 
-from jwt_ import get_current_user
+from fast_routers.jwt_ import get_current_user
 from models import AdminPanelUser
 
 admin_user_router = APIRouter(prefix='/panel-users', tags=['Panel User'])

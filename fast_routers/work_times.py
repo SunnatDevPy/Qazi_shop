@@ -6,7 +6,7 @@ from fastapi.params import Depends
 from pydantic import BaseModel
 from sqlalchemy.exc import DBAPIError
 from starlette import status
-from jwt_ import get_current_user
+from fast_routers.jwt_ import get_current_user
 from models import AdminPanelUser, Shop, WorkTimes
 
 work_router = APIRouter(prefix='/work', tags=['Work Shop'])

@@ -8,7 +8,7 @@ from sqlalchemy.exc import DBAPIError
 from starlette import status
 import pandas as pd
 from models import AdminPanelUser, ShopCategory, Shop
-from jwt_ import get_current_user
+from fast_routers.jwt_ import get_current_user
 
 shop_category_router = APIRouter(prefix='/shop-categories', tags=['Shop Categories'])
 

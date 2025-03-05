@@ -8,7 +8,7 @@ from sqlalchemy.exc import DBAPIError
 from starlette import status
 
 from models import MainPhoto, AdminPanelUser
-from jwt_ import get_current_user
+from fast_routers.jwt_ import get_current_user
 
 main_photos_router = APIRouter(prefix='/banners', tags=['Banners'])
 

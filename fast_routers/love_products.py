@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from sqlalchemy.exc import DBAPIError
 from starlette import status
 
-from jwt_ import get_current_user
+from fast_routers.jwt_ import get_current_user
 from models import ShopProduct, Shop, BotUser
 from models.products_model import LoveProducts
 from utils import FavouritesSchema

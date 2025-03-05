@@ -10,7 +10,7 @@ from starlette import status
 from models import AdminPanelUser, Shop
 from utils import ListShopsModel
 from utils.details import all_data
-from jwt_ import get_current_user
+from fast_routers.jwt_ import get_current_user
 
 shop_router = APIRouter(prefix='/shop', tags=['Shop'])
 
