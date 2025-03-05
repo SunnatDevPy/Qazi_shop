@@ -1,24 +1,30 @@
-from typing import Optional
+from typing import Optional, Annotated
 
 from fastapi import APIRouter, Form, UploadFile, File
 from fastapi import Response
+from fastapi.params import Depends
 from pydantic import BaseModel
 from sqlalchemy.exc import DBAPIError
 from starlette import status
 import pandas as pd
 from models import AdminPanelUser, ShopCategory, Shop
+from jwt_ import get_current_user
 
 shop_category_router = APIRouter(prefix='/shop-categories', tags=['Shop Categories'])
 
 
+class UserId(BaseModel):
+    id: int
+
+
 @shop_category_router.get(path='', name="Categories")
-async def list_category_shop():
+async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)]):
     categories = await ShopCategory.all()
     return categories
 
 
 @shop_category_router.get(path='/from-shop', name="List from Shop")
-async def list_category_shop(shop_id: int):
+async def list_category_shop(shop_id: int, user: Annotated[UserId, Depends(get_current_user)]):
     shop = await Shop.get(shop_id)
     if shop:
         category = await ShopCategory.get_shop_categories(shop_id)
@@ -38,14 +44,14 @@ async def list_category_shop(shop_id: int):
 
 
 @shop_category_router.post(path='', name="Create Category")
-async def list_category_shop(seller_id: int,
+async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)],
                              shop_id: int = Form(),
                              name_uz: str = Form(),
                              name_ru: str = Form(),
                              parent_id: int = Form(default=None),
                              photo: UploadFile = File()
                              ):
-    seller: AdminPanelUser = await AdminPanelUser.get(seller_id)
+    seller: AdminPanelUser = await AdminPanelUser.get(user.id)
     shop = await Shop.get(shop_id)
     if seller and shop:
         if seller.id == shop.owner_id or seller.status in ['moderator', "admin", "superuser"]:
@@ -67,7 +73,7 @@ async def list_category_shop(seller_id: int,
 
 # # Update Category
 @shop_category_router.patch(path='/detail', name="Update Category")
-async def list_category_shop(operator_id: int,
+async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)],
                              category_id: int,
                              name_uz: str = Form(),
                              name_ru: str = Form(),
@@ -75,7 +81,7 @@ async def list_category_shop(operator_id: int,
                              is_active: bool = Form(default=None),
                              photo: UploadFile = File(default=None),
                              ):
-    user: AdminPanelUser = await AdminPanelUser.get(operator_id)
+    user: AdminPanelUser = await AdminPanelUser.get(user.id)
     if parent_id == 0:
         parent_id = None
     if photo:
@@ -107,8 +113,8 @@ async def list_category_shop(operator_id: int,
 
 
 @shop_category_router.delete(path='', name="Delete Category")
-async def list_category_shop(category_id: int, operator_id: int):
-    user: AdminPanelUser = await AdminPanelUser.get(operator_id)
+async def list_category_shop(category_id: int, user: Annotated[UserId, Depends(get_current_user)]):
+    user: AdminPanelUser = await AdminPanelUser.get(user.id)
     if user:
         if user.status in ['moderator', "admin", "superuser"]:
             category = await ShopCategory.get(category_id)

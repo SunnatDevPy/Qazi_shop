@@ -1,22 +1,31 @@
+from typing import Annotated
+
 from fastapi import APIRouter, File, UploadFile, Form
 from fastapi import Response
+from fastapi.params import Depends
+from pydantic import BaseModel
 from sqlalchemy.exc import DBAPIError
 from starlette import status
 
 from models import AdminPanelUser, Shop
 from utils import ListShopsModel
 from utils.details import all_data
+from jwt_ import get_current_user
 
 shop_router = APIRouter(prefix='/shop', tags=['Shop'])
 
 
+class UserId(BaseModel):
+    user_id: int
+
+
 @shop_router.get(path='', name="Shops")
-async def list_category_shop() -> list[ListShopsModel]:
+async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)]) -> list[ListShopsModel]:
     return await Shop.all()
 
 
 @shop_router.get(path='/detail', name="Get Shop")
-async def list_category_shop(shop_id: int):
+async def list_category_shop(shop_id: int, user: Annotated[UserId, Depends(get_current_user)]):
     shop = await Shop.get(shop_id)
     if shop:
         return {'shop': shop}
@@ -25,12 +34,12 @@ async def list_category_shop(shop_id: int):
 
 
 @shop_router.get(path='/all', name="Get Shop")
-async def list_category_shop():
+async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)]):
     return await all_data()
 
 
 @shop_router.post(path='', name="Create Shop")
-async def list_category_shop(owner_id: int,
+async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)],
                              name_uz: str = Form(),
                              name_ru: str = Form(),
                              district_uz: str = Form(),
@@ -44,10 +53,10 @@ async def list_category_shop(owner_id: int,
                              cart_number: int = Form(),
                              photo: UploadFile = File()
                              ):
-    user: AdminPanelUser = await AdminPanelUser.get(owner_id)
+    user: AdminPanelUser = await AdminPanelUser.get(user.id)
     if user:
         if user.status in ['moderator', "admin", "superuser"]:
-            shop = await Shop.create(owner_id=owner_id, name_uz=name_uz,
+            shop = await Shop.create(owner_id=user.id, name_uz=name_uz,
                                      name_ru=name_ru,
                                      district_uz=district_uz,
                                      address_uz=address_uz,
@@ -64,7 +73,7 @@ async def list_category_shop(owner_id: int,
 
 # Update Shop
 @shop_router.patch(path='/detail', name="Update Shop")
-async def list_category_shop(operator_id: int,
+async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)],
                              shop_id: int,
                              name_uz: str = Form(default=None),
                              name_ru: str = Form(None),
@@ -80,7 +89,7 @@ async def list_category_shop(operator_id: int,
                              is_active: bool = Form(None),
                              photo: UploadFile = File(None)
                              ):
-    user: AdminPanelUser = await AdminPanelUser.get(operator_id)
+    user: AdminPanelUser = await AdminPanelUser.get(user.id)
     shop: Shop = await Shop.get(shop_id)
     if user and shop:
         if photo:
@@ -120,8 +129,8 @@ async def list_category_shop(operator_id: int,
 
 
 @shop_router.delete(path='', name="Delete Shop")
-async def list_category_shop(operator_id: int, shop_id: int):
-    user: AdminPanelUser = await AdminPanelUser.get(operator_id)
+async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)], shop_id: int):
+    user: AdminPanelUser = await AdminPanelUser.get(user.id)
     shop: Shop = await Shop.get(shop_id)
     if user and shop:
         if user.status in ["moderator", "admin", "superuser"]:

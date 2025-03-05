@@ -1,8 +1,9 @@
 from typing import Annotated, Optional
 
 from fastapi import APIRouter, HTTPException, Form
+from fastapi.params import Depends
 from pydantic import BaseModel
-
+from fast_routers.jwt_ import get_current_user
 from models import BotUser, AdminPanelUser
 
 bot_user_router = APIRouter(prefix='/bot-users', tags=['Bot User'])
@@ -28,9 +29,13 @@ class UserList(BaseModel):
     day_and_night: Optional[bool] = True
 
 
+class UserId(BaseModel):
+    id: Optional[int] = None
+
+
 @bot_user_router.post("", name="Create Bot User")
-async def user_add(operator_id: int, user_create: Annotated[UserAdd, Form()]):
-    admin_user: AdminPanelUser = await AdminPanelUser.get(operator_id)
+async def user_add(user: Annotated[UserId, Depends(get_current_user)], user_create: Annotated[UserAdd, Form()]):
+    admin_user: AdminPanelUser = await AdminPanelUser.get(user.id)
     if admin_user:
         if admin_user.status in ['moderator', "admin"]:
             result = await BotUser.create(**user_create.dict())
@@ -42,7 +47,7 @@ async def user_add(operator_id: int, user_create: Annotated[UserAdd, Form()]):
 
 
 @bot_user_router.get('', name="List Bot User")
-async def user_list() -> list[UserList]:
+async def user_list(user: Annotated[UserId, Depends(get_current_user)]) -> list[UserList]:
     users = await BotUser.all()
     return users
 
@@ -56,8 +61,8 @@ class UserUpdate(BaseModel):
 
 
 @bot_user_router.get("/profile", name="Detail Bot User")
-async def user_detail(user_id: int):
-    user = await BotUser.get(user_id)
+async def user_detail(user: Annotated[UserId, Depends(get_current_user)]):
+    user = await BotUser.get(user.id)
     if user:
         return user
     else:
@@ -65,9 +70,9 @@ async def user_detail(user_id: int):
 
 
 @bot_user_router.patch("/profile", name="Update Bot User")
-async def user_patch_update(operator_id: int, items: Annotated[UserUpdate, Form()]):
-    user = await BotUser.get(operator_id)
-    if user and operator_id:
+async def user_patch_update(user: Annotated[UserId, Depends(get_current_user)], items: Annotated[UserUpdate, Form()]):
+    user = await BotUser.get(user.id)
+    if user:
         update_data = {k: v for k, v in items.dict().items() if v is not None}
         if update_data:
             await BotUser.update(user.id, **update_data)
@@ -79,8 +84,8 @@ async def user_patch_update(operator_id: int, items: Annotated[UserUpdate, Form(
 
 
 @bot_user_router.delete("/")
-async def user_delete(operator_id: int, user_id: int):
-    user = await BotUser.get(operator_id)
+async def user_delete(user: Annotated[UserId, Depends(get_current_user)], user_id: int):
+    user = await BotUser.get(user.id)
     if user:
         if user.status.value in ['moderator', "admin"]:
             await BotUser.delete(user_id)

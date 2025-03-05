@@ -2,8 +2,10 @@ from typing import Annotated, Optional
 
 import bcrypt
 from fastapi import APIRouter, HTTPException, Form
+from fastapi.params import Depends
 from pydantic import BaseModel
 
+from jwt_ import get_current_user
 from models import AdminPanelUser
 
 admin_user_router = APIRouter(prefix='/panel-users', tags=['Panel User'])
@@ -32,8 +34,12 @@ class UserList(BaseModel):
     day_and_night: Optional[bool] = False
 
 
+class UserId(BaseModel):
+    id: Optional[int] = None
+
+
 @admin_user_router.post("", name="Create Panel User")
-async def user_add(operator_id: int, user_create: Annotated[UserAdd, Form()]):
+async def user_add(user: Annotated[UserId, Depends(get_current_user)], user_create: Annotated[UserAdd, Form()]):
     try:
         user = await AdminPanelUser.create(**user_create.dict())
         return {'ok': True, "user": user}
@@ -42,7 +48,7 @@ async def user_add(operator_id: int, user_create: Annotated[UserAdd, Form()]):
 
 
 @admin_user_router.get('', name="List Panel User")
-async def user_list() -> list[UserList]:
+async def user_list(user: Annotated[UserId, Depends(get_current_user)]) -> list[UserList]:
     users = await AdminPanelUser.all()
     return users
 
@@ -57,8 +63,8 @@ class UserUpdate(BaseModel):
 
 
 @admin_user_router.get("/profile", name="Detail Panel User")
-async def user_detail(user_id: int):
-    user = await AdminPanelUser.get(user_id)
+async def user_detail(user: Annotated[UserId, Depends(get_current_user)]):
+    user = await AdminPanelUser.get(user.id)
     if user:
         return user
     else:
@@ -66,9 +72,9 @@ async def user_detail(user_id: int):
 
 
 @admin_user_router.patch("/profile", name="Update User")
-async def user_patch_update(user_id: int, items: Annotated[UserUpdate, Form()]):
-    user = await AdminPanelUser.get(user_id)
-    if user and user_id:
+async def user_patch_update(user: Annotated[UserId, Depends(get_current_user)], items: Annotated[UserUpdate, Form()]):
+    user = await AdminPanelUser.get(user.id)
+    if user:
         update_data = {k: v for k, v in items.dict().items() if v is not None}
         if update_data:
             await AdminPanelUser.update(user.id, **update_data)
@@ -80,8 +86,8 @@ async def user_patch_update(user_id: int, items: Annotated[UserUpdate, Form()]):
 
 
 @admin_user_router.patch("/status", name="Update Status")
-async def user_add(operator_id: int, user_id: int, status: str = Form()):
-    operator = await AdminPanelUser.get(operator_id)
+async def user_add(user: Annotated[UserId, Depends(get_current_user)], user_id: int, status: str = Form()):
+    operator = await AdminPanelUser.get(user_id)
     user = await AdminPanelUser.get(user_id)
     if operator:
         if operator.status.value == "admin":

@@ -1,23 +1,33 @@
+from typing import Annotated
+
 from fastapi import APIRouter, UploadFile, File, Form
 from fastapi import Response
+from fastapi.params import Depends
+from pydantic import BaseModel
 from sqlalchemy.exc import DBAPIError
 from starlette import status
 
 from models import MainPhoto, AdminPanelUser
+from jwt_ import get_current_user
 
 main_photos_router = APIRouter(prefix='/banners', tags=['Banners'])
 
 
+class UserId(BaseModel):
+    id: int
+
+
 @main_photos_router.get(path='', name="All banner photos")
-async def list_category_shop():
+async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)]):
     photos = await MainPhoto.all()
     return {'photos': photos}
 
 
 @main_photos_router.post(path='', name="Create")
-async def list_category_shop(operator_id: int, language: str, photo: UploadFile = File(default=None),
+async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)], language: str,
+                             photo: UploadFile = File(default=None),
                              video: UploadFile = File(default=None)):
-    user: AdminPanelUser = await AdminPanelUser.get(operator_id)
+    user: AdminPanelUser = await AdminPanelUser.get(user.id)
 
     if user:
         if user.status in ['moderator', "admin", "superuser"]:
@@ -52,8 +62,8 @@ async def list_category_shop(operator_id: int, language: str, photo: UploadFile 
 
 
 @main_photos_router.delete(path='/', name="Delete Banner photo")
-async def list_category_shop(operator_id: int, photo_id: int = Form()):
-    user: AdminPanelUser = await AdminPanelUser.get(operator_id)
+async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)], photo_id: int = Form()):
+    user: AdminPanelUser = await AdminPanelUser.get(user.id)
     if user:
         if user.status in ['moderator', "admin", "superuser"]:
             if await MainPhoto.get(photo_id):

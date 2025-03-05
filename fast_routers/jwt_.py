@@ -59,7 +59,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], admin=False):
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         icecream.ic(payload)
@@ -68,10 +68,13 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], admin=
             raise credentials_exception
     except InvalidTokenError:
         raise credentials_exception
-    if admin:
-        user = await AdminPanelUser.get(int(user_id))
+    user = await AdminPanelUser.get(int(user_id))
+    if user:
+        pass
     else:
         user = await BotUser.get(int(user_id))
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
     return user
 
 

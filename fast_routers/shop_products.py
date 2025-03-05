@@ -1,17 +1,23 @@
-from typing import Optional, Annotated, List
+from typing import Optional, Annotated
 
 from fastapi import APIRouter, File, UploadFile, Form
 from fastapi import Response
+from fastapi.params import Depends
 from pydantic import BaseModel
 from sqlalchemy.exc import DBAPIError
 from starlette import status
 
+from jwt_ import get_current_user
 from models import ShopProduct, ShopCategory, AdminPanelUser, Shop, ProductTip
 from models.products_model import LoveProducts
 from utils import ProductList
-from utils.details import get_products_utils, update_products
+from utils.details import update_products
 
 shop_product_router = APIRouter(prefix='/shop-products', tags=['Shop Products'])
+
+
+class UserId(BaseModel):
+    id: int
 
 
 # @product_router.get("/", name='product_list')
@@ -37,25 +43,25 @@ shop_product_router = APIRouter(prefix='/shop-products', tags=['Shop Products'])
 
 
 @shop_product_router.get(path='', name="Get All Products")
-async def list_category_shop() -> list[ProductList]:
+async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)]) -> list[ProductList]:
     return await ShopProduct.all()
 
 
 @shop_product_router.get(path='/detail', name="Get Product")
-async def list_category_shop(product_id: int):
+async def list_category_shop(product_id: int, user: Annotated[UserId, Depends(get_current_user)]):
     product = await ShopProduct.get(product_id)
     product.tips = await ProductTip.get_product_tips(product_id)
     return {"product": product}
 
 
 @shop_product_router.get(path='/from-shop', name="Get from Shop Products")
-async def list_category_shop(shop_id: int) -> list[ProductList]:
+async def list_category_shop(shop_id: int, user: Annotated[UserId, Depends(get_current_user)]) -> list[ProductList]:
     products = await ShopProduct.get_from_shop(shop_id)
     return products
 
 
 @shop_product_router.post(path='', name="Create Product from Category")
-async def list_category_shop(operator_id: int,
+async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)],
                              name_uz: str = Form(),
                              name_ru: str = Form(),
                              description_uz: str = Form(),
@@ -66,7 +72,7 @@ async def list_category_shop(operator_id: int,
                              volume: int = Form(None),
                              unit: str = Form(None),
                              photo: UploadFile = File(default=None), ):
-    user: AdminPanelUser = await AdminPanelUser.get(operator_id)
+    user: AdminPanelUser = await AdminPanelUser.get(user.id)
     category = await ShopCategory.get_from_shop(shop_id, category_id)
     shop = await Shop.get(shop_id)
     if user and shop:
@@ -76,7 +82,7 @@ async def list_category_shop(operator_id: int,
                     product = await ShopProduct.create(
                         name_uz=name_uz,
                         name_ru=name_ru,
-                        owner_id=operator_id,
+                        owner_id=user.id,
                         category_id=category_id,
                         description_uz=description_uz,
                         description_ru=description_ru,
@@ -100,7 +106,8 @@ async def list_category_shop(operator_id: int,
 
 
 @shop_product_router.get(path='/search', name="search")
-async def list_category_shop(search: Optional[str] = None, category_id: Optional[int] = None):
+async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)], search: Optional[str] = None,
+                             category_id: Optional[int] = None):
     category = await ShopCategory.get(category_id)
     if category:
         products = await ShopProduct.search_shops(search, category_id)
@@ -111,7 +118,7 @@ async def list_category_shop(search: Optional[str] = None, category_id: Optional
 
 # Update Shop
 @shop_product_router.patch(path='/detail', name="Update Shop Product")
-async def list_category_shop(operator_id: int,
+async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)],
                              shop_product_id: int = Form(),
                              name_uz: str = Form(),
                              name_ru: str = Form(),
@@ -124,7 +131,7 @@ async def list_category_shop(operator_id: int,
                              unit: str = Form(None),
                              photo: UploadFile = File(default=None),
                              ):
-    user: AdminPanelUser = await AdminPanelUser.get(operator_id)
+    user: AdminPanelUser = await AdminPanelUser.get(user.id)
     product = await ShopProduct.get(shop_product_id)
     if category_id == 0:
         category_id = None
@@ -162,8 +169,8 @@ async def list_category_shop(operator_id: int,
 
 
 @shop_product_router.delete(path='', name="Delete Shop Products")
-async def list_category_shop(operator_id: int, shop_product_id: int):
-    user: AdminPanelUser = await AdminPanelUser.get(operator_id)
+async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)], shop_product_id: int):
+    user: AdminPanelUser = await AdminPanelUser.get(user.id)
     product = await ShopProduct.get(shop_product_id)
     if user and product:
         if user.status in ['moderator', "admin", "superuser"] or user.id == product.owner_id:
@@ -186,30 +193,32 @@ class ProductTipsSchema(BaseModel):
 
 
 @shop_product_router.get(path='/tips', name="Get All Product tips")
-async def list_category_shop() -> list[ProductTipsSchema]:
+async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)]) -> list[ProductTipsSchema]:
     tips = await ProductTip.all()
     return tips
 
 
 @shop_product_router.get(path='/tips/detail', name="Get product tip")
-async def list_category_shop(product_tip_id: int) -> list[ProductTipsSchema]:
+async def list_category_shop(product_tip_id: int, user: Annotated[UserId, Depends(get_current_user)]) -> list[
+    ProductTipsSchema]:
     tip = await ProductTip.get(product_tip_id)
     return tip
 
 
 @shop_product_router.get(path='/tips/from-product', name="Get from Products")
-async def list_category_shop(product_tip_id: int) -> list[ProductTipsSchema]:
+async def list_category_shop(product_tip_id: int, user: Annotated[UserId, Depends(get_current_user)]) -> list[
+    ProductTipsSchema]:
     tips = await ProductTip.get_product_tips(product_tip_id)
     return tips
 
 
 @shop_product_router.post(path='/tips', name="Create Product Tips")
-async def list_category_shop(operator_id: int,
+async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)],
                              product_id: int = Form(),
                              price: int = Form(),
                              volume: int = Form(),
                              unit: str = Form()):
-    user: AdminPanelUser = await AdminPanelUser.get(operator_id)
+    user: AdminPanelUser = await AdminPanelUser.get(user.id)
     product = await ShopProduct.get(product_id)
     if user:
         if product:
@@ -243,8 +252,9 @@ class UpdateTips(BaseModel):
 
 # Update Shop
 @shop_product_router.patch(path='/tips/detail', name="Update Product Tips")
-async def list_category_shop(operator_id: int, product_tip_id: int, items: Annotated[UpdateTips, Form()]):
-    user: AdminPanelUser = await AdminPanelUser.get(operator_id)
+async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)], product_tip_id: int,
+                             items: Annotated[UpdateTips, Form()]):
+    user: AdminPanelUser = await AdminPanelUser.get(user.id)
     tip = await ProductTip.get(product_tip_id)
     if user and tip:
         update_data = {k: v for k, v in items.dict().items() if v is not None}
@@ -265,8 +275,8 @@ async def list_category_shop(operator_id: int, product_tip_id: int, items: Annot
 
 
 @shop_product_router.delete(path='/tips', name="Delete Product tip")
-async def list_category_shop(operator_id: int, product_tip_id: int):
-    user: AdminPanelUser = await AdminPanelUser.get(operator_id)
+async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)], product_tip_id: int):
+    user: AdminPanelUser = await AdminPanelUser.get(user.id)
     tip = await ProductTip.get(product_tip_id)
     if user and tip:
         if user.status in ['moderator', "admin", "superuser"]:
