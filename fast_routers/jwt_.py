@@ -110,18 +110,18 @@ async def login_for_access_token(user_id: Annotated[UserId, Depends()]) -> Token
         raise HTTPException(status_code=404, detail="Item not found")
 
 
-@jwt_router.post("/admin-token", response_model=Token)
-async def login_for_access_token(user_id: Annotated[UserId, Depends()]) -> Token:
-    user = await AdminPanelUser.get(user_id.user_id)
-    if user:
-        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        access_token = create_access_token(
-            data={"user_id": str(user_id.user_id)},
-            expires_delta=access_token_expires
-        )
-        return Token(access_token=access_token, token_type='bearer')
-    else:
-        raise HTTPException(status_code=404, detail="Item not found")
+# @jwt_router.post("/admin-token", response_model=Token)
+# async def login_for_access_token(user_id: Annotated[UserId, Depends()]) -> Token:
+#     user = await AdminPanelUser.get(user_id.user_id)
+#     if user:
+#         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+#         access_token = create_access_token(
+#             data={"user_id": str(user_id.user_id)},
+#             expires_delta=access_token_expires
+#         )
+#         return Token(access_token=access_token, token_type='bearer')
+#     else:
+#         raise HTTPException(status_code=404, detail="Item not found")
 
 
 @jwt_router.post("/refresh")

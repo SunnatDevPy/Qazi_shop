@@ -1,15 +1,20 @@
 from typing import Annotated, Optional
 
 import bcrypt
+from asyncpg.pgproto.pgproto import timedelta
 from fastapi import APIRouter, HTTPException, Form
 from fastapi.params import Depends
 from pydantic import BaseModel
 
-from fast_routers.jwt_ import get_current_user
+from fast_routers.jwt_ import get_current_user, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
 from models import AdminPanelUser
 
 admin_user_router = APIRouter(prefix='/panel-users', tags=['Panel User'])
 
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
 
 class UserAdd(BaseModel):
     id: int
@@ -123,12 +128,17 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
 
-@admin_user_router.post(path='/login', name="Login")
-async def login(items: Annotated[UserLogin, Form()]) -> UserList:
+@admin_user_router.post(path='/login', name="Login", response_model=Token)
+async def login(items: Annotated[UserLogin, Form()]) -> Token:
     user = await AdminPanelUser.get_from_username(items.username)
     if user:
         if verify_password(items.password, user.password):
-            return user
+            access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+            access_token = create_access_token(
+                data={"user_id": str(user.id)},
+                expires_delta=access_token_expires
+            )
+            return Token(access_token=access_token, token_type='bearer')
         else:
             raise HTTPException(status_code=404, detail="parol yoki usernameda hatolik")
     else:
