@@ -1,4 +1,5 @@
 from datetime import datetime
+from enum import Enum
 from typing import Optional, Annotated, List
 
 from fastapi import APIRouter, Form, HTTPException
@@ -86,8 +87,21 @@ class OrderItemSchema(BaseModel):
     id: int
 
 
+class StatusOrder(str, Enum):
+    NEW = "yangi"
+    IS_GOING = "yig'ilmoqda"
+    IN_PROGRESS = "yetkazilmoqda"
+    DELIVERED = "yetkazildi"
+    CANCELLED = "bekor qilindi"
+
+
+class Payment(str, Enum):
+    CASH = "naqt"
+    TERMINAL = "karta"
+
+
 class CreateOrder(BaseModel):
-    payment: str
+    payment: Payment
     long: float
     lat: float
     contact: str
@@ -166,7 +180,7 @@ async def create_call_order(call_user_id: int, shop_id: int, order_data: CreateO
 
 
 class UpdateOrder(BaseModel):
-    order_status: Optional[str] = None
+    status: StatusOrder
 
 
 @call_order_router.patch(path='', name="Update Order")
