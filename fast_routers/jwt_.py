@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta, timezone
 from http.client import HTTPException
-from typing import Annotated
+from typing import Annotated, Optional
 
+import bcrypt
 import jwt
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer
@@ -96,16 +97,31 @@ async def protected_route(user_id=Depends(get_current_user)):
     return {"message": f"Ruxsat berildi {user_id}"}
 
 
-@jwt_router.post("/bot-token", response_model=Token)
-async def login_for_access_token(user_id: Annotated[UserId, Depends()]) -> Token:
-    user = await BotUser.get(user_id.user_id)
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+
+
+@jwt_router.post("/token")
+async def login_for_access_token(bot_user_id: Optional[int] = None, username: Optional[str] = None,
+                                 password: Optional[str] = None):
+    if bot_user_id:
+        user = await BotUser.get(bot_user_id)
+    elif username and password:
+        user = await AdminPanelUser.filter(AdminPanelUser.username == username)
+        if verify_password(password, user.password):
+            pass
+        else:
+            raise HTTPException(status_code=404, detail="Parol hato")
+    else:
+        raise HTTPException(status_code=404, detail="Item not found")
+
     if user:
         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = create_access_token(
-            data={"user_id": str(user_id.user_id)},
+            data={"user_id": str(bot_user_id)},
             expires_delta=access_token_expires
         )
-        return Token(access_token=access_token, token_type='bearer')
+        return {"token": Token(access_token=access_token, token_type='bearer'), "user": user}
     else:
         raise HTTPException(status_code=404, detail="Item not found")
 
