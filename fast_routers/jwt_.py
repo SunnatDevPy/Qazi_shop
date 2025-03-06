@@ -5,7 +5,7 @@ from typing import Annotated, Optional
 import bcrypt
 import jwt
 from fastapi import APIRouter, HTTPException, Depends
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from icecream import icecream
 from jose import JWTError
 from passlib.context import CryptContext
@@ -102,28 +102,28 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 
 @jwt_router.post("/token")
-async def login_for_access_token(bot_user_id: Optional[int] = None, username: Optional[str] = None,
-                                 password: Optional[str] = None):
+async def login_for_access_token(
+        bot_user_id: Optional[int] = None,
+        form_data: OAuth2PasswordRequestForm = Depends(None)
+):
+    print(form_data)
     if bot_user_id:
         user = await BotUser.get(bot_user_id)
-    elif username and password:
-        user = await AdminPanelUser.filter(AdminPanelUser.username == username)
-        if verify_password(password, user.password):
-            pass
-        else:
-            raise HTTPException(status_code=404, detail="Parol hato")
     else:
-        raise HTTPException(status_code=404, detail="Item not found")
+        user = await AdminPanelUser.filter(AdminPanelUser.username == form_data.username)
+        if not user or not verify_password(form_data.password, user.password):
+            raise HTTPException(status_code=401, detail="Invalid username or password")
 
-    if user:
-        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        access_token = create_access_token(
-            data={"user_id": str(bot_user_id)},
-            expires_delta=access_token_expires
-        )
-        return {"token": Token(access_token=access_token, token_type='bearer'), "user": user}
-    else:
-        raise HTTPException(status_code=404, detail="Item not found")
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"user_id": str(user.id)},
+        expires_delta=access_token_expires
+    )
+
+    return {"access_token": access_token, "token_type": "bearer", "user": user}
 
 
 # @jwt_router.post("/admin-token", response_model=Token)
