@@ -16,6 +16,7 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
+
 class UserAdd(BaseModel):
     id: int
     first_name: Optional[str] = None
@@ -94,6 +95,8 @@ async def user_patch_update(user: Annotated[UserId, Depends(get_current_user)], 
 async def user_add(user: Annotated[UserId, Depends(get_current_user)], user_id: int, status: str = Form()):
     operator = await AdminPanelUser.get(user_id)
     user = await AdminPanelUser.get(user_id)
+    if status not in ['MODERATOR', 'moderator', 'admin', "ADMIN", 'CALL_CENTER', "call center"]:
+        raise HTTPException(status_code=404, detail="Not status")
     if operator:
         if operator.status.value == "admin":
             if status == 'string' or status == '':
@@ -150,6 +153,7 @@ class Register(BaseModel):
     last_name: Optional[str] = None
     username: Optional[str] = None
     contact: Optional[str] = None
+    status: Optional[str] = None
     password: str
 
 
@@ -161,6 +165,8 @@ def hash_password(password: str) -> str:
 async def register(items: Annotated[Register, Form()]) -> UserList:
     items.password = hash_password(items.password)
     user: AdminPanelUser = await AdminPanelUser.filter(AdminPanelUser.username == items.username)
+    if items.status not in ['MODERATOR', 'moderator', 'admin', "ADMIN", 'CALL_CENTER', "call center"]:
+        raise HTTPException(status_code=404, detail="Not status")
     if user:
         raise HTTPException(status_code=404, detail="Bunday username bor")
     else:
