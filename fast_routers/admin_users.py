@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Annotated, Optional
 
 import bcrypt
@@ -91,8 +92,15 @@ async def user_patch_update(user: Annotated[UserId, Depends(get_current_user)], 
         raise HTTPException(status_code=404, detail="Item not found")
 
 
+class UserStatus(str, Enum):
+    MODERATOR = "moderator"
+    ADMIN = "admin"
+    CALL_CENTER = "call center"
+
+
 @admin_user_router.patch("/status", name="Update Status")
-async def user_add(user: Annotated[UserId, Depends(get_current_user)], user_id: int, status: str = Form()):
+async def user_add(user: Annotated[UserId, Depends(get_current_user)], user_id: int,
+                   status: Annotated[UserStatus, Form()]):
     operator = await AdminPanelUser.get(user_id)
     user = await AdminPanelUser.get(user_id)
     if status not in ['MODERATOR', 'moderator', 'admin', "ADMIN", 'CALL_CENTER', "call center"]:
@@ -153,7 +161,7 @@ class Register(BaseModel):
     last_name: Optional[str] = None
     username: Optional[str] = None
     contact: Optional[str] = None
-    status: Optional[str] = None
+    status: UserStatus
     password: str
 
 
@@ -162,13 +170,14 @@ def hash_password(password: str) -> str:
 
 
 @admin_user_router.post(path='/register', name="Register")
-async def register(items: Annotated[Register, Form()]) -> UserList:
+async def register(user: Annotated[UserId, Depends(get_current_user)], items: Annotated[Register, Form()]) -> UserList:
     items.password = hash_password(items.password)
+    print(items)
     user: AdminPanelUser = await AdminPanelUser.filter(AdminPanelUser.username == items.username)
     if items.status not in ['MODERATOR', 'moderator', 'admin', "ADMIN", 'CALL_CENTER', "call center"]:
         raise HTTPException(status_code=404, detail="Not status")
     if user:
         raise HTTPException(status_code=404, detail="Bunday username bor")
     else:
-        users = await AdminPanelUser.create(**items.dict(), status="moderator", day_and_night=False, is_active=False)
+        users = await AdminPanelUser.create(**items.dict(), day_and_night=False, is_active=False)
         return users
