@@ -140,7 +140,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 
 @admin_user_router.post(path='/login', name="Login", response_model=Token)
-async def login(items: Annotated[UserLogin, Form()]) -> Token:
+async def login(items: Annotated[UserLogin, Form()]):
     user = await AdminPanelUser.get_from_username(items.username)
     if user:
         if verify_password(items.password, user.password):
@@ -149,7 +149,7 @@ async def login(items: Annotated[UserLogin, Form()]) -> Token:
                 data={"user_id": str(user.id)},
                 expires_delta=access_token_expires
             )
-            return Token(access_token=access_token, token_type='bearer')
+            return {"token": Token(access_token=access_token, token_type='bearer'), "user": user}
         else:
             raise HTTPException(status_code=404, detail="parol yoki usernameda hatolik")
     else:
