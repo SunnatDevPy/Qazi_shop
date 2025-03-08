@@ -18,13 +18,13 @@ class UserId(BaseModel):
 
 
 @shop_category_router.get(path='', name="Categories")
-async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)]):
+async def list_category_shop():
     categories = await ShopCategory.all()
     return categories
 
 
 @shop_category_router.get(path='/from-shop', name="List from Shop")
-async def list_category_shop(shop_id: int, user: Annotated[UserId, Depends(get_current_user)]):
+async def list_category_shop(shop_id: int):
     shop = await Shop.get(shop_id)
     if shop:
         category = await ShopCategory.get_shop_categories(shop_id)

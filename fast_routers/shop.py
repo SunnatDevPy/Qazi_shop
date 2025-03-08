@@ -20,12 +20,12 @@ class UserId(BaseModel):
 
 
 @shop_router.get(path='', name="Shops")
-async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)]) -> list[ListShopsModel]:
+async def list_category_shop() -> list[ListShopsModel]:
     return await Shop.all()
 
 
 @shop_router.get(path='/detail', name="Get Shop")
-async def list_category_shop(shop_id: int, user: Annotated[UserId, Depends(get_current_user)]):
+async def list_category_shop(shop_id: int,):
     shop = await Shop.get(shop_id)
     if shop:
         return {'shop': shop}
@@ -34,7 +34,7 @@ async def list_category_shop(shop_id: int, user: Annotated[UserId, Depends(get_c
 
 
 @shop_router.get(path='/all', name="Get Shop")
-async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)]):
+async def list_category_shop():
     return await all_data()
 
 

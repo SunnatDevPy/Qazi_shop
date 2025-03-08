@@ -39,15 +39,15 @@ async def list_category_shop(shop_id: int, user: Annotated[UserId, Depends(get_c
 
 
 @favourites_router.get(path='/from-user', name="Get from User and Shop Favourites")
-async def list_category_shop(shop_id: int, user: Annotated[UserId, Depends(get_current_user)]) -> list[
+async def list_category_shop(shop_id: int, user_id: int) -> list[
     FavouritesSchema]:
-    products = await LoveProducts.get_cart_from_shop(user.id, shop_id)
+    products = await LoveProducts.get_cart_from_shop(user_id, shop_id)
     return products
 
 
 @favourites_router.post(path='', name="Create Product from Favourites")
-async def list_category_shop(product_id: int, shop_id: int, user: Annotated[UserId, Depends(get_current_user)]):
-    user: BotUser = await BotUser.get(user.id)
+async def list_category_shop(product_id: int, shop_id: int, user_id: int):
+    user: BotUser = await BotUser.get(user_id)
     product: ShopProduct = await ShopProduct.get_shop_product(product_id, shop_id)
     shop = await Shop.get(shop_id)
     if user and shop:
@@ -70,7 +70,7 @@ async def list_category_shop(product_id: int, shop_id: int, user: Annotated[User
 
 
 @favourites_router.delete(path='', name="Delete Shop Favourites")
-async def list_category_shop(favourites_id: int, user: Annotated[UserId, Depends(get_current_user)]):
+async def list_category_shop(favourites_id: int):
     product = await LoveProducts.get(favourites_id)
     if product:
         await LoveProducts.delete(favourites_id)

@@ -15,6 +15,10 @@ from utils.details import detail_order, sum_price_carts
 order_router = APIRouter(prefix='/order', tags=['Orders'])
 
 
+class UserId(BaseModel):
+    id: Optional[int] = None
+
+
 @order_router.get(path='', name="Orders")
 async def list_category_shop() -> list[OrderModel]:
     orders = await Order.all()
@@ -47,15 +51,6 @@ async def list_category_shop(user_id: int, status_order: str):
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
 
-# @order_router.get(path='/from-shop', name="Get Cart from User in Shop")
-# async def list_category_shop(user_id: int, shop_id: int):
-#     orders = await detail_orders_types(user_id, shop_id)
-#     if orders:
-#         return {'orders': orders}
-#     else:
-#         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
-
-
 class CreateOrder(BaseModel):
     payment: str
     long: float
@@ -66,15 +61,16 @@ class CreateOrder(BaseModel):
 
 
 @order_router.post(path='', name="Create Order from User")
-async def list_category_shop(client_id: int, shop_id: int, items: Annotated[CreateOrder, Form()]):
-    user = await BotUser.get(client_id)
+async def list_category_shop(user_id: int, shop_id: int,
+                             items: Annotated[CreateOrder, Form()]):
+    user = await BotUser.get(user_id)
     shop = await Shop.get(shop_id)
     if items.payment not in ['CASH', "TERMINAL", "karta", 'naqt']:
         return Response("Payment type notog'ri yuborildi", status.HTTP_404_NOT_FOUND)
 
     if user:
         if shop:
-            carts: list['Cart'] = await Cart.get_cart_from_shop(client_id, shop_id)
+            carts: list['Cart'] = await Cart.get_cart_from_shop(user.id, shop_id)
             if carts:
                 try:
                     distance_km = geodesic((shop.lat, shop.long), (items.lat, items.long)).kilometers
@@ -83,7 +79,7 @@ async def list_category_shop(client_id: int, shop_id: int, items: Annotated[Crea
                 sum_order = await sum_price_carts(carts)
                 try:
                     order = await Order.create(**items.dict(), total_sum=sum_order, driver_price=distance_km,
-                                               shop_id=shop_id, bot_user_id=client_id, status="NEW")
+                                               shop_id=shop_id, bot_user_id=user.id, status="NEW")
                     order_items_ = []
                     for cart in carts:
                         s = await OrderItem.create(product_id=cart.product_id, order_id=order.id, count=cart.count,
@@ -125,7 +121,8 @@ class UpdateOrder(BaseModel):
 
 
 @order_router.patch(path='', name="Update Order")
-async def list_category_shop(order_id: int, items: Annotated[UpdateOrder, Form()]):
+async def list_category_shop(order_id: int, items: Annotated[UpdateOrder, Form()],
+                             ):
     if items.status not in ['yangi', 'NEW', "IS_GOING", "yig'ilmoqda",
                             "IN_PROGRESS", "yetkazilmoqda",
                             "DELIVERED", "yetkazildi",
@@ -148,7 +145,7 @@ async def list_category_shop(order_id: int, items: Annotated[UpdateOrder, Form()
 
 
 @order_router.patch(path='/canceled', name="Canceled Order")
-async def list_category_shop(order_id: int):
+async def list_category_shop(order_id: int, ):
     order = await Order.get(order_id)
     if order:
         await Order.update(order.id, status="CANCELLED")

@@ -15,13 +15,13 @@ class UserId(BaseModel):
 
 
 @work_router.get(path='', name="Work all")
-async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)]):
+async def list_category_shop():
     works = await WorkTimes.all()
     return {"works": works}
 
 
 @work_router.get(path='/detail', name="Get Work")
-async def list_category_shop(work_id: int, user: Annotated[UserId, Depends(get_current_user)]):
+async def list_category_shop(work_id: int):
     work = await WorkTimes.get(work_id)
     if work:
         return work
@@ -30,7 +30,7 @@ async def list_category_shop(work_id: int, user: Annotated[UserId, Depends(get_c
 
 
 @work_router.get(path='/from_shop', name="Get Work in Shop")
-async def list_category_shop(shop_id: int, user: Annotated[UserId, Depends(get_current_user)]):
+async def list_category_shop(shop_id: int):
     return {"works": await WorkTimes.from_shop(shop_id)}
 
 

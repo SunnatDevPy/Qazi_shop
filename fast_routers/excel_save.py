@@ -1,23 +1,31 @@
+from typing import Optional, Annotated
+
 import aiofiles
 import pandas as pd
 from fastapi import APIRouter, UploadFile, File
 from fastapi import Response
+from fastapi.params import Depends
+from pydantic import BaseModel
 from starlette import status
-
+from fast_routers.jwt_ import get_current_user
 from models import AdminPanelUser, ShopProduct, ShopCategory, Shop, ProductTip
 
 excel_router = APIRouter(prefix='/excel', tags=['Excel'])
 
 
+class UserId(BaseModel):
+    id: Optional[int] = None
+
+
 @excel_router.post("/product", name="Create or Update Product")
-async def upload_excel(operator_id: int, excel_file: UploadFile = File(...)):
-    user: AdminPanelUser = await AdminPanelUser.get(operator_id)
+async def upload_excel(user: Annotated[UserId, Depends(get_current_user)], excel_file: UploadFile = File(...)):
+    user: AdminPanelUser = await AdminPanelUser.get(user.id)
     if user is None:
         return Response("Item not found", status.HTTP_404_NOT_FOUND)
 
     if user.status not in ['moderator', 'admin', 'superuser']:
         return Response("Item not found", status.HTTP_404_NOT_FOUND)
-    file_path = f"temp_{operator_id}.xlsx"
+    file_path = f"temp_{user.id}.xlsx"
 
     async with aiofiles.open(file_path, "wb") as f:
         await f.write(await excel_file.read())
@@ -87,14 +95,14 @@ async def upload_excel(operator_id: int, excel_file: UploadFile = File(...)):
 
 
 @excel_router.post(path='/tips', name="Create or Update Product tips")
-async def list_category_shop(operator_id: int, excel_file: UploadFile = File()):
-    user: AdminPanelUser = await AdminPanelUser.get(operator_id)
+async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)], excel_file: UploadFile = File()):
+    user: AdminPanelUser = await AdminPanelUser.get(user.id)
     if user is None:
         return Response("Item not found", status.HTTP_404_NOT_FOUND)
 
     if user.status not in ['moderator', 'admin', 'superuser']:
         return Response("Item not found", status.HTTP_404_NOT_FOUND)
-    file_path = f"temp_{operator_id}.xlsx"
+    file_path = f"temp_{user.id}.xlsx"
 
     async with aiofiles.open(file_path, "wb") as f:
         await f.write(await excel_file.read())

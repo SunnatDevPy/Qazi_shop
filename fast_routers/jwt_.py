@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from http.client import HTTPException
-from typing import Annotated, Optional
+from typing import Annotated
 
 import bcrypt
 import jwt
@@ -13,7 +13,7 @@ from passlib.exc import InvalidTokenError
 from pydantic import BaseModel
 from starlette import status
 
-from models import BotUser, AdminPanelUser
+from models import AdminPanelUser
 
 SECRET_KEY = "selectstalker"
 ALGORITHM = "HS256"
@@ -70,10 +70,6 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     except InvalidTokenError:
         raise credentials_exception
     user = await AdminPanelUser.get(int(user_id))
-    if user:
-        pass
-    else:
-        user = await BotUser.get(int(user_id))
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
@@ -102,17 +98,12 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 
 @jwt_router.post("/token")
-async def login_for_access_token(
-        bot_user_id: Optional[int] = None,
-        form_data: OAuth2PasswordRequestForm = Depends(None)
-):
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(None)):
     print(form_data)
-    if bot_user_id:
-        user = await BotUser.get(bot_user_id)
-    else:
-        user = await AdminPanelUser.filter(AdminPanelUser.username == form_data.username)
-        if not user or not verify_password(form_data.password, user.password):
-            raise HTTPException(status_code=401, detail="Invalid username or password")
+
+    user = await AdminPanelUser.filter(AdminPanelUser.username == form_data.username)
+    if not user or not verify_password(form_data.password, user.password):
+        raise HTTPException(status_code=401, detail="Invalid username or password")
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

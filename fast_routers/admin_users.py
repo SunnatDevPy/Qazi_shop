@@ -46,7 +46,7 @@ class UserId(BaseModel):
 
 
 @admin_user_router.post("", name="Create Panel User")
-async def user_add(user: Annotated[UserId, Depends(get_current_user)], user_create: Annotated[UserAdd, Form()]):
+async def user_add(user_create: Annotated[UserAdd, Form()]):
     try:
         user = await AdminPanelUser.create(**user_create.dict())
         return {'ok': True, "user": user}
@@ -55,7 +55,7 @@ async def user_add(user: Annotated[UserId, Depends(get_current_user)], user_crea
 
 
 @admin_user_router.get('', name="List Panel User")
-async def user_list(user: Annotated[UserId, Depends(get_current_user)]) -> list[UserList]:
+async def user_list() -> list[UserList]:
     users = await AdminPanelUser.all()
     return users
 

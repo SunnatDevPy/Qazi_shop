@@ -1,16 +1,15 @@
 from typing import Optional, Annotated
 
-from fastapi import APIRouter, Form
+from fastapi import APIRouter
 from fastapi import Response
-from geopy.distance import geodesic
+from fastapi.params import Depends
 from pydantic import BaseModel
 from sqlalchemy.exc import DBAPIError
 from starlette import status
 
-from dispatcher import bot
-from models import BotUser, Shop, Cart, Order, OrderItem, CallCenters, AdminPanelUser
+from fast_routers.jwt_ import get_current_user
+from models import Shop, Order, CallCenters, AdminPanelUser
 from utils import OrderModel
-from utils.details import detail_order, sum_price_carts
 
 contact_router = APIRouter(prefix='/contact', tags=['Contact'])
 
@@ -36,9 +35,13 @@ async def list_category_shop(shop_id: int):
         return Response("Item Not Found", status.HTTP_404_NOT_FOUND)
 
 
+class UserId(BaseModel):
+    id: Optional[int] = None
+
+
 @contact_router.post(path='', name="Create Order from User")
-async def list_category_shop(moderator_id: int, contact: str, shop_id: int):
-    user = await AdminPanelUser.get(moderator_id)
+async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)], contact: str, shop_id: int):
+    user = await AdminPanelUser.get(user.id)
     shop = await Shop.get(shop_id)
     contact = await CallCenters.filter(CallCenters.contact == contact.strip())
     if contact:
@@ -61,8 +64,8 @@ async def list_category_shop(moderator_id: int, contact: str, shop_id: int):
 
 
 @contact_router.patch(path='', name="Update Order")
-async def list_category_shop(moderator_id: int, contact_id: int, new_contact: str):
-    user = await AdminPanelUser.get(moderator_id)
+async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)], contact_id: int, new_contact: str):
+    user = await AdminPanelUser.get(user.id)
     contact: CallCenters = await CallCenters.get(contact_id)
     if contact and user:
         if contact.contact != new_contact and user.status in ['moderator', 'admin', 'superuser']:
@@ -79,9 +82,9 @@ async def list_category_shop(moderator_id: int, contact_id: int, new_contact: st
 
 
 @contact_router.patch(path='/delete', name="Contact Delete")
-async def list_category_shop(moderator_id: int, contact_id: int):
+async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)], contact_id: int):
     order = await CallCenters.get(contact_id)
-    user = await AdminPanelUser.get(moderator_id)
+    user = await AdminPanelUser.get(user.id)
     if order and user:
         if user.status in ['moderator', 'admin', 'superuser']:
             await Order.update(order.id, status="CANCELLED")

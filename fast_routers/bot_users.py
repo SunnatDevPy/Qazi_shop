@@ -34,8 +34,8 @@ class UserId(BaseModel):
 
 
 @bot_user_router.post("", name="Create Bot User")
-async def user_add(user: Annotated[UserId, Depends(get_current_user)], user_create: Annotated[UserAdd, Form()]):
-    admin_user: AdminPanelUser = await AdminPanelUser.get(user.id)
+async def user_add(user_id, user_create: Annotated[UserAdd, Form()]):
+    admin_user: AdminPanelUser = await AdminPanelUser.get(user_id)
     if admin_user:
         if admin_user.status in ['moderator', "admin"]:
             result = await BotUser.create(**user_create.dict())
@@ -47,7 +47,7 @@ async def user_add(user: Annotated[UserId, Depends(get_current_user)], user_crea
 
 
 @bot_user_router.get('', name="List Bot User")
-async def user_list(user: Annotated[UserId, Depends(get_current_user)]) -> list[UserList]:
+async def user_list() -> list[UserList]:
     users = await BotUser.all()
     return users
 
@@ -61,8 +61,8 @@ class UserUpdate(BaseModel):
 
 
 @bot_user_router.get("/profile", name="Detail Bot User")
-async def user_detail(user: Annotated[UserId, Depends(get_current_user)]):
-    user = await BotUser.get(user.id)
+async def user_detail(user_id):
+    user = await BotUser.get(user_id)
     if user:
         return user
     else:
@@ -70,8 +70,8 @@ async def user_detail(user: Annotated[UserId, Depends(get_current_user)]):
 
 
 @bot_user_router.patch("/profile", name="Update Bot User")
-async def user_patch_update(user: Annotated[UserId, Depends(get_current_user)], items: Annotated[UserUpdate, Form()]):
-    user = await BotUser.get(user.id)
+async def user_patch_update(user_id, items: Annotated[UserUpdate, Form()]):
+    user = await BotUser.get(user_id)
     if user:
         update_data = {k: v for k, v in items.dict().items() if v is not None}
         if update_data:
@@ -84,8 +84,8 @@ async def user_patch_update(user: Annotated[UserId, Depends(get_current_user)], 
 
 
 @bot_user_router.delete("/")
-async def user_delete(user: Annotated[UserId, Depends(get_current_user)], user_id: int):
-    user = await BotUser.get(user.id)
+async def user_delete(user_id: int):
+    user = await BotUser.get(user_id)
     if user:
         if user.status.value in ['moderator', "admin"]:
             await BotUser.delete(user_id)

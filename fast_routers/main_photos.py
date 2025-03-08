@@ -18,7 +18,7 @@ class UserId(BaseModel):
 
 
 @main_photos_router.get(path='', name="All banner photos")
-async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)]):
+async def list_category_shop():
     photos = await MainPhoto.all()
     return {'photos': photos}
 

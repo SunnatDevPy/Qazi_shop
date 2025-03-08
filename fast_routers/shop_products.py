@@ -43,19 +43,19 @@ class UserId(BaseModel):
 
 
 @shop_product_router.get(path='', name="Get All Products")
-async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)]) -> list[ProductList]:
+async def list_category_shop() -> list[ProductList]:
     return await ShopProduct.all()
 
 
 @shop_product_router.get(path='/detail', name="Get Product")
-async def list_category_shop(product_id: int, user: Annotated[UserId, Depends(get_current_user)]):
+async def list_category_shop(product_id: int):
     product = await ShopProduct.get(product_id)
     product.tips = await ProductTip.get_product_tips(product_id)
     return {"product": product}
 
 
 @shop_product_router.get(path='/from-shop', name="Get from Shop Products")
-async def list_category_shop(shop_id: int, user: Annotated[UserId, Depends(get_current_user)]) -> list[ProductList]:
+async def list_category_shop(shop_id: int) -> list[ProductList]:
     products = await ShopProduct.get_from_shop(shop_id)
     return products
 
@@ -106,7 +106,7 @@ async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)],
 
 
 @shop_product_router.get(path='/search', name="search")
-async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)], search: Optional[str] = None,
+async def list_category_shop(search: Optional[str] = None,
                              category_id: Optional[int] = None):
     category = await ShopCategory.get(category_id)
     if category:
@@ -193,20 +193,20 @@ class ProductTipsSchema(BaseModel):
 
 
 @shop_product_router.get(path='/tips', name="Get All Product tips")
-async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)]) -> list[ProductTipsSchema]:
+async def list_category_shop() -> list[ProductTipsSchema]:
     tips = await ProductTip.all()
     return tips
 
 
 @shop_product_router.get(path='/tips/detail', name="Get product tip")
-async def list_category_shop(product_tip_id: int, user: Annotated[UserId, Depends(get_current_user)]) -> list[
+async def list_category_shop(product_tip_id: int) -> list[
     ProductTipsSchema]:
     tip = await ProductTip.get(product_tip_id)
     return tip
 
 
 @shop_product_router.get(path='/tips/from-product', name="Get from Products")
-async def list_category_shop(product_tip_id: int, user: Annotated[UserId, Depends(get_current_user)]) -> list[
+async def list_category_shop(product_tip_id: int) -> list[
     ProductTipsSchema]:
     tips = await ProductTip.get_product_tips(product_tip_id)
     return tips

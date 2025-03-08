@@ -4,6 +4,7 @@ from typing import Optional, Annotated, List
 
 from fastapi import APIRouter, Form, HTTPException
 from fastapi import Response
+from fastapi.params import Depends
 from geopy.distance import geodesic
 from pydantic import BaseModel
 from sqlalchemy.exc import DBAPIError
@@ -13,6 +14,8 @@ from dispatcher import bot
 from models import Shop, Order, CallOrder, AdminPanelUser, CallOrderItem, ShopProduct, ProductTip
 from utils import OrderModel, ProductList
 from utils.details import detail_order
+
+from fast_routers.jwt_ import get_current_user
 
 call_order_router = APIRouter(prefix='/call-order', tags=['Call Orders'])
 
@@ -45,6 +48,10 @@ class CallOrderModel(BaseModel):
     updated_at: Optional[datetime] = None
     order_items: Optional[list[CallOrderItemsModel]] = None
     product: Optional[ProductList] = None
+
+
+class UserId(BaseModel):
+    id: Optional[int] = None
 
 
 @call_order_router.get(path='', name="Call Orders")
@@ -111,8 +118,8 @@ class CreateOrder(BaseModel):
 
 
 @call_order_router.post(path='', name="Create Call Order from User")
-async def create_call_order(call_user_id: int, shop_id: int, order_data: CreateOrder):
-    user = await AdminPanelUser.get(call_user_id)
+async def create_call_order(user: Annotated[UserId, Depends(get_current_user)], shop_id: int, order_data: CreateOrder):
+    user = await AdminPanelUser.get(user.id)
     shop = await Shop.get(shop_id)
 
     if order_data.payment not in ['CASH', "TERMINAL", "karta", 'naqt']:
@@ -132,15 +139,15 @@ async def create_call_order(call_user_id: int, shop_id: int, order_data: CreateO
     except:
         distance_km = 0
 
-    sum_order = sum(item.count * item.price for item in order_data.items)  # Подсчет суммы заказа
+    sum_order = sum(item.count * item.price for item in order_data.items)
 
     try:
         order = await CallOrder.create(
-            **order_data.dict(exclude={"items"}),  # Убираем список товаров из словаря перед вставкой
+            **order_data.dict(exclude={"items"}),
             total_sum=sum_order,
             driver_price=distance_km,
             shop_id=shop_id,
-            call_user_id=call_user_id,
+            call_user_id=user.id,
             status="NEW"
         )
 
@@ -184,7 +191,8 @@ class UpdateOrder(BaseModel):
 
 
 @call_order_router.patch(path='', name="Update Order")
-async def list_category_shop(call_order_id: int, items: Annotated[UpdateOrder, Form()]):
+async def list_category_shop(call_order_id: int, items: Annotated[UpdateOrder, Form()],
+                             user: Annotated[UserId, Depends(get_current_user)]):
     if items.status not in ['yangi', 'NEW', "IS_GOING", "yig'ilmoqda",
                             "IN_PROGRESS", "yetkazilmoqda",
                             "DELIVERED", "yetkazildi",
@@ -207,7 +215,7 @@ async def list_category_shop(call_order_id: int, items: Annotated[UpdateOrder, F
 
 
 @call_order_router.patch(path='/canceled', name="Canceled Order")
-async def list_category_shop(call_order_id: int):
+async def list_category_shop(call_order_id: int, user: Annotated[UserId, Depends(get_current_user)]):
     order = await CallOrder.get(call_order_id)
     if order:
         await CallOrder.update(order.id, status="CANCELLED")
