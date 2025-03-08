@@ -64,6 +64,7 @@ class OrderItemsModel(BaseModel):
     unit: str
     price: int
     total: int
+    product: Optional[ProductList] = None
 
 
 class OrderModel(BaseModel):
@@ -82,7 +83,7 @@ class OrderModel(BaseModel):
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     order_items: Optional[list[OrderItemsModel]] = None
-    product: Optional[ProductList] = None
+
 
 class FavouritesSchema(BaseModel):
     id: int
@@ -91,6 +92,7 @@ class FavouritesSchema(BaseModel):
     bot_user_id: int
     product: Optional[ProductList] = None
     is_active: Optional[bool] = None
+
 
 class CartModel(BaseModel):
     id: int
