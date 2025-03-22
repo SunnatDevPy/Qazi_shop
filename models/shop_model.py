@@ -32,11 +32,6 @@ class Shop(BaseModel):
     is_active: Mapped[bool] = mapped_column(nullable=False)
     work: Mapped[list['WorkTimes']] = relationship('WorkTimes', lazy='selectin', back_populates='shop')
 
-    @classmethod
-    async def get_shops_from_user(cls, id_):
-        query = select(cls).order_by(desc(cls.id)).filter(cls.owner_id == id_)
-        return (await db.execute(query)).scalars().all()
-
 
 class WorkTimes(BaseModel):
     shop_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shops.id', ondelete='CASCADE'))
