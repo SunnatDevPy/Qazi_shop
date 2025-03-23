@@ -10,12 +10,12 @@ from pydantic import BaseModel
 from sqlalchemy.exc import DBAPIError
 from starlette import status
 
+from bot.buttuns.inline import group_order_btn
 from dispatcher import bot
-from models import Shop, Order, CallOrder, AdminPanelUser, CallOrderItem, ShopProduct, ProductTip
+from fast_routers.jwt_ import get_current_user
+from models import Shop, Order, CallOrder, AdminPanelUser, CallOrderItem, ProductTip
 from utils import OrderModel, ProductList
 from utils.details import detail_order
-
-from fast_routers.jwt_ import get_current_user
 
 call_order_router = APIRouter(prefix='/call-order', tags=['Call Orders'])
 
@@ -75,8 +75,9 @@ async def list_category_shop(call_user_id: int, shop_id: int) -> list[OrderModel
 
 @call_order_router.get(path='/from-status', name="Get Call Order from Status in User")
 async def list_category_shop(call_user_id: int, status_order: str):
-    if status_order not in ['yangi', 'NEW', "IS_GOING", "yig'ilmoqda",
-                            "IN_PROGRESS", "yetkazilmoqda",
+    if status_order not in ['yangi', 'NEW', "IN_PROGRESS", "yetkazilmoqda",
+                            "IS_PROCESS", "jarayonda",
+                            "READY", "tayyor",
                             "DELIVERED", "yetkazildi",
                             "CANCELLED", "bekor qilindi"]:
         return Response("Buyurtmaga notog'ri status berilgan", status.HTTP_404_NOT_FOUND)
@@ -166,14 +167,16 @@ async def create_call_order(user: Annotated[UserId, Depends(get_current_user)], 
             order_items.append(order_item)
 
         try:
-            location = await bot.send_location(shop.order_group_id, latitude=order.lat, longitude=order.long)
-            await bot.send_message(shop.order_group_id, await detail_order(order), parse_mode="HTML",
-                                   reply_to_message_id=location.message_id)
+            message = await bot.send_message(shop.order_group_id, await detail_order(order), parse_mode="HTML",
+                                             reply_markup=group_order_btn(order))
+            await bot.send_location(shop.order_group_id, latitude=order.lat, longitude=order.long,
+                                    reply_to_message_id=message.message_id)
         except:
             try:
-                location = await bot.send_location(279361769, latitude=order.lat, longitude=order.long)
-                await bot.send_message(279361769, await detail_order(order), parse_mode="HTML",
-                                       reply_to_message_id=location.message_id)
+                message = await bot.send_message(279361769, await detail_order(order), parse_mode="HTML",
+                                                 reply_markup=group_order_btn(order))
+                await bot.send_location(279361769, latitude=order.lat, longitude=order.long,
+                                        reply_to_message_id=message.message_id)
             except:
                 return {"ok": True, "message": "Buyurtma yaratildi lekin guruxga yuborimadi", "order": order,
                         "items": order_items}
@@ -193,8 +196,9 @@ class UpdateOrder(BaseModel):
 @call_order_router.patch(path='', name="Update Order")
 async def list_category_shop(call_order_id: int, items: Annotated[UpdateOrder, Form()],
                              user: Annotated[UserId, Depends(get_current_user)]):
-    if items.status not in ['yangi', 'NEW', "IS_GOING", "yig'ilmoqda",
+    if items.status not in ['yangi', 'NEW', "IS_PROCESS", "jarayonda",
                             "IN_PROGRESS", "yetkazilmoqda",
+                            "READY", "tayyor",
                             "DELIVERED", "yetkazildi",
                             "CANCELLED", "bekor qilindi"]:
         return Response("Buyurtmaga notog'ri status berilgan", status.HTTP_404_NOT_FOUND)

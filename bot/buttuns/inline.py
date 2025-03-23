@@ -73,3 +73,31 @@ def get_location():
     kb = ReplyKeyboardBuilder()
     kb.add(*[KeyboardButton(text='📍Locatsiya jonatish📍', request_location=True)])
     return kb.as_markup(resize_keyboard=True)
+
+
+NEW = "yangi"
+IS_PROCESS = "jarayonda"
+READY = "tayyor"
+IN_PROGRESS = "yetkazilmoqda"
+DELIVERED = "yetkazildi"
+CANCELLED = "bekor qilindi"
+
+
+def group_order_btn(order):
+    ikb = InlineKeyboardBuilder()
+    if order.status == 'NEW':
+        ikb.row(InlineKeyboardButton(text='Qabul qilish', callback_data=f'group_add_{order.id}'))
+        ikb.row(InlineKeyboardButton(text='Bekor qilish', callback_data=f'group_canceled_{order.id}'))
+    elif order.status == "IS_PROCESS":
+        ikb.row(InlineKeyboardButton(text='Tayyor', callback_data=f'group_add_{order.id}'))
+        ikb.row(InlineKeyboardButton(text='Bekor qilish', callback_data=f'group_canceled_{order.id}'))
+    elif order.status == "READY":
+        ikb.row(InlineKeyboardButton(text="Yo'lda", callback_data=f'group_add_{order.id}'))
+    elif order.status == "IN_PROGRESS":
+        ikb.row(InlineKeyboardButton(text="Yetkazildi", callback_data=f'group_add_{order.id}'))
+    elif order.status == 'DELIVERED':
+        return
+    ikb.adjust(2, repeat=True)
+    return ikb.as_markup()
+
+

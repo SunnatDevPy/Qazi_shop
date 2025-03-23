@@ -2,7 +2,7 @@ from enum import Enum
 
 from fastapi_storages import FileSystemStorage
 from fastapi_storages.integrations.sqlalchemy import ImageType, FileType
-from sqlalchemy import Boolean, select, desc
+from sqlalchemy import Boolean, select
 from sqlalchemy import ForeignKey, BIGINT, Enum as SqlEnum
 from sqlalchemy import String
 from sqlalchemy.orm import mapped_column, Mapped, relationship
@@ -25,7 +25,6 @@ class BotUser(BaseModel):
     first_name: Mapped[str] = mapped_column(String(255), nullable=True)
     last_name: Mapped[str] = mapped_column(String(255), nullable=True)
     username: Mapped[str] = mapped_column(String(255), nullable=True)
-    day_and_night: Mapped[bool] = mapped_column(Boolean, default=False)
     contact: Mapped[str] = mapped_column(nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, server_default="False")
 
@@ -45,7 +44,6 @@ class AdminPanelUser(BaseModel):
     password: Mapped[str] = mapped_column(String(255), nullable=True)
     status: Mapped[str] = mapped_column(SqlEnum(StatusUser), nullable=True)
     contact: Mapped[str] = mapped_column(nullable=True)
-    day_and_night: Mapped[bool] = mapped_column(Boolean)
     is_active: Mapped[bool] = mapped_column(Boolean)
 
     def __str__(self):
@@ -73,7 +71,8 @@ class Cart(BaseModel):
 class Order(CreatedBaseModel):
     class StatusOrder(str, Enum):
         NEW = "yangi"
-        IS_GOING = "yig'ilmoqda"
+        IS_PROCESS = "jarayonda"
+        READY = "tayyor"
         IN_PROGRESS = "yetkazilmoqda"
         DELIVERED = "yetkazildi"
         CANCELLED = "bekor qilindi"

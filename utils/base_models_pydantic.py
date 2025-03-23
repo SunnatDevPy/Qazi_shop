@@ -17,13 +17,9 @@ class ListShopsModel(BaseModel):
     owner_id: Optional[int]
     name_uz: Optional[str]
     name_ru: Optional[str]
-    work_status: Optional[str]
     lat: Optional[float]
     long: Optional[float]
-    district_uz: Optional[str] = None
-    district_ru: Optional[str] = None
-    address_uz: Optional[str] = None
-    address_ru: Optional[str] = None
+    address: Optional[str] = None
     order_group_id: Optional[int] = None
     cart_number: Optional[int] = None
     photo: Optional[str] = None
@@ -104,3 +100,29 @@ class CartModel(BaseModel):
     total: int
     product_in_cart: Optional[ProductList] = None
     tip: Optional[ProductTipSchema] = None
+
+
+class ListCategoryModel(BaseModel):
+    id: int
+    name_uz: str
+    name_ru: str
+    shop_id: int
+    photo: str
+    is_active: bool
+    products: Optional[List['ProductList']] = None
+
+
+class ListShopsModelAll(BaseModel):
+    id: Optional[int]
+    owner_id: Optional[int]
+    name_uz: Optional[str]
+    name_ru: Optional[str]
+    lat: Optional[float]
+    long: Optional[float]
+    address: Optional[str] = None
+    order_group_id: Optional[int] = None
+    cart_number: Optional[int] = None
+    photo: Optional[str] = None
+    is_active: Optional[bool] = None
+    work: Optional[List[WorkModel]] = None
+    category: Optional[List['ListCategoryModel']] = None

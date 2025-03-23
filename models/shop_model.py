@@ -10,22 +10,13 @@ from models.database import BaseModel, db
 
 
 class Shop(BaseModel):
-    class WorkTime(str, Enum):
-        OPEN = 'ochiq'
-        CLOSE = 'yopiq'
-
-    work_status: Mapped[str] = mapped_column(SqlEnum(WorkTime))
-
     name_uz: Mapped[str] = mapped_column(VARCHAR(255))
     name_ru: Mapped[str] = mapped_column(VARCHAR(255))
     owner_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('admin_panel_users.id', ondelete='CASCADE'),
                                           nullable=True)
     lat: Mapped[float]
     long: Mapped[float]
-    district_uz: Mapped[str]
-    district_ru: Mapped[str]
-    address_uz: Mapped[str]
-    address_ru: Mapped[str]
+    address: Mapped[str]
     order_group_id: Mapped[int] = mapped_column(BigInteger)
     cart_number: Mapped[int] = mapped_column(BigInteger)
     photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/')))
@@ -44,3 +35,5 @@ class WorkTimes(BaseModel):
 class CallCenters(BaseModel):
     shop_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('shops.id', ondelete='CASCADE'))
     contact: Mapped[str]
+
+
