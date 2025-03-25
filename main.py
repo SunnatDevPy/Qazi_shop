@@ -43,18 +43,17 @@ app.add_middleware(
     # allow_methods=["*"],
     # allow_headers=["*"],
     CORSMiddleware,
-    allow_origins=[
-        "https://web.telegram.org",
-        "https://gxfl20sh-5173.euw.devtunnels.ms/",
-        "http://localhost:3000",
-        "http://localhost:5173"
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],  # Явное указание методов
     allow_headers=["*"],
     expose_headers=["*"],
     max_age=600  # Кеширование CORS-префлайт запросов (в секундах)
 )
+# "https://web.telegram.org",
+# "https://gxfl20sh-5173.euw.devtunnels.ms/",
+# "http://localhost:3000",
+# "http://localhost:5173"
 
 app.add_middleware(SessionMiddleware, secret_key=conf.SECRET_KEY)
 
