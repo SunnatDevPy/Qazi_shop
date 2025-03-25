@@ -17,7 +17,7 @@ class UserId(BaseModel):
     id: int
 
 
-@main_photos_router.get(path="-photo", name="All banner photos")
+@main_photos_router.options(path="-photo", name="All banner photos")
 async def list_banner_photos():
     try:
         photos = await MainPhoto.all()
