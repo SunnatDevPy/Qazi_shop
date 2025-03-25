@@ -23,25 +23,26 @@ async def list_category_shop():
     return {'photos': photos}
 
 
-@main_photos_router.post(path='', name="Create")
-async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)], language: str,
-                             photo: UploadFile = File(default=None),
-                             video: UploadFile = File(default=None)):
+@main_photos_router.post("", name="Create")
+async def list_category_shop(
+    user: Annotated[UserId, Depends(get_current_user)],
+    language: str = Form(...),
+    photo: UploadFile = File(None),
+    video: UploadFile = File(None),
+):
     user: AdminPanelUser = await AdminPanelUser.get(user.id)
 
     if user:
-        if user.status in ['moderator', "admin", "superuser"]:
+        if user.status in ["moderator", "admin", "superuser"]:
             try:
                 await MainPhoto.create(photo=photo, language=language, video=video)
                 return {"ok": True}
-            except DBAPIError as e:
-                return Response("Yaratishda xatolik", status.HTTP_404_NOT_FOUND)
-
+            except DBAPIError:
+                return Response("Yaratishda xatolik", status_code=status.HTTP_404_NOT_FOUND)
         else:
-            return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
+            return Response("Bu userda xuquq yo'q", status_code=status.HTTP_404_NOT_FOUND)
     else:
-        return Response("User yo'q", status.HTTP_404_NOT_FOUND)
-
+        return Response("User yo'q", status_code=status.HTTP_404_NOT_FOUND)
 
 # @main_photos_router.patch(path='/update', name="Update Banner photo")
 # async def list_category_shop(operator_id: int, photo: UploadFile = File(), photo_id: int = Form()):
