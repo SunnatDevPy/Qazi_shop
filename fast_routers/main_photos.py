@@ -17,19 +17,19 @@ class UserId(BaseModel):
     id: int
 
 
-@main_photos_router.get(path='', name="All banner photos")
+@main_photos_router.get(path='-photo', name="All banner photos")
 async def list_category_shop():
     photos = await MainPhoto.all()
     return {'photos': photos}
 
 
-@main_photos_router.get(path='', name="All banner videos")
+@main_photos_router.get(path='-video', name="All banner videos")
 async def list_category_shop():
     photos = await MainVideo.all()
     return {'photos': photos}
 
 
-@main_photos_router.post("", name="Create Photo")
+@main_photos_router.post("-photo", name="Create Photo")
 async def list_category_shop(
         user: Annotated[UserId, Depends(get_current_user)],
         language: str = Form(...),
@@ -50,7 +50,7 @@ async def list_category_shop(
         return Response("User yo'q", status_code=status.HTTP_404_NOT_FOUND)
 
 
-@main_photos_router.post("", name="Create Video ")
+@main_photos_router.post("-video", name="Create Video ")
 async def list_category_shop(
         user: Annotated[UserId, Depends(get_current_user)],
         language: str = Form(...),
@@ -89,7 +89,7 @@ async def list_category_shop(
 #         return Response("User yo'q", status.HTTP_404_NOT_FOUND)
 
 
-@main_photos_router.delete(path='/', name="Delete Banner photo")
+@main_photos_router.delete(path='-photo', name="Delete Banner photo")
 async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)], photo_id: int = Form()):
     user: AdminPanelUser = await AdminPanelUser.get(user.id)
     if user:
@@ -104,7 +104,8 @@ async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)],
     else:
         return Response("User yo'q", status.HTTP_404_NOT_FOUND)
 
-@main_photos_router.delete(path='/', name="Delete Banner Video")
+
+@main_photos_router.delete(path='-video', name="Delete Banner Video")
 async def list_category_shop(user: Annotated[UserId, Depends(get_current_user)], video_id: int = Form()):
     user: AdminPanelUser = await AdminPanelUser.get(user.id)
     if user:
