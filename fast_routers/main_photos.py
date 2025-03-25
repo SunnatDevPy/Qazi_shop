@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, UploadFile, File, Form
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from fastapi import Response
 from fastapi.params import Depends
 from pydantic import BaseModel
@@ -17,10 +17,15 @@ class UserId(BaseModel):
     id: int
 
 
-@main_photos_router.get(path='-photo', name="All banner photos")
-async def list_category_shop():
-    photos = await MainPhoto.all()
-    return {'photos': photos}
+@main_photos_router.get(path="-photo", name="All banner photos")
+async def list_banner_photos():
+    try:
+        photos = await MainPhoto.all()
+        if not photos:
+            raise HTTPException(status_code=404, detail="No banner photos found")
+        return {"photos": photos}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 
 @main_photos_router.get(path='-video', name="All banner videos")
@@ -29,7 +34,7 @@ async def list_category_shop():
     return {'photos': photos}
 
 
-@main_photos_router.options("-photo", name="Create Photo")
+@main_photos_router.post("-photo", name="Create Photo")
 async def list_category_shop(
         user: Annotated[UserId, Depends(get_current_user)],
         language: str = Form(...),
@@ -69,7 +74,6 @@ async def list_category_shop(
             return Response("Bu userda xuquq yo'q", status_code=status.HTTP_404_NOT_FOUND)
     else:
         return Response("User yo'q", status_code=status.HTTP_404_NOT_FOUND)
-
 
 
 @main_photos_router.delete(path='-photo', name="Delete Banner photo")
