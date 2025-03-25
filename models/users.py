@@ -17,6 +17,14 @@ class MainPhoto(BaseModel):
         RU = 'ru'
 
     photo: Mapped[ImageField] = mapped_column(ImageType(storage=FileSystemStorage('media/')), nullable=True)
+    language: Mapped[str] = mapped_column(SqlEnum(LanguageBanner), nullable=True)
+
+
+class MainVideo(BaseModel):
+    class LanguageBanner(str, Enum):
+        UZ = 'uz'
+        RU = 'ru'
+
     video: Mapped[FileField] = mapped_column(FileType(storage=FileSystemStorage('media/')), nullable=True)
     language: Mapped[str] = mapped_column(SqlEnum(LanguageBanner), nullable=True)
 
