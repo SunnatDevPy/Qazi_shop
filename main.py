@@ -35,7 +35,6 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(docs_url="/docs", lifespan=lifespan)
-app.add_middleware(SessionMiddleware, secret_key=conf.SECRET_KEY)
 app.add_middleware(
     # CORSMiddleware,
     # # allow_origins=["https://web.telegram.org", "https://your-client.com"],
@@ -51,14 +50,9 @@ app.add_middleware(
         "http://localhost:5173"
     ],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # Явное указание методов
-    allow_headers=[
-        "Authorization",
-        "Content-Type",
-        "Accept",
-        "X-Requested-With"
-    ],
-    expose_headers=["*"],  # Какие заголовки могут быть доступны клиенту
+    allow_methods=["*"],  # Явное указание методов
+    allow_headers=["*"],
+    expose_headers=["*"],
     max_age=600  # Кеширование CORS-префлайт запросов (в секундах)
 )
 
