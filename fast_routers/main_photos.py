@@ -29,7 +29,7 @@ async def list_category_shop():
     return {'photos': photos}
 
 
-@main_photos_router.post("-photo", name="Create Photo")
+@main_photos_router.options("-photo", name="Create Photo")
 async def list_category_shop(
         user: Annotated[UserId, Depends(get_current_user)],
         language: str = Form(...),
@@ -70,23 +70,6 @@ async def list_category_shop(
     else:
         return Response("User yo'q", status_code=status.HTTP_404_NOT_FOUND)
 
-
-# @main_photos_router.patch(path='/update', name="Update Banner photo")
-# async def list_category_shop(operator_id: int, photo: UploadFile = File(), photo_id: int = Form()):
-#     user = await AdminPanelUser.get(operator_id)
-#     if not photo.content_type.startswith("image/"):
-#         return Response("fayl rasim bo'lishi kerak", status.HTTP_404_NOT_FOUND)
-#     if user:
-#         if user.status.value in ['moderator', "admin", "superuser"]:
-#             if await MainPhoto.get(photo_id):
-#                 await MainPhoto.update(photo_id, photos=photo)
-#                 return {"ok": True}
-#             else:
-#                 return Response("Bunday idli rasim yo'q", status.HTTP_404_NOT_FOUND)
-#         else:
-#             return Response("Bu userda xuquq yo'q", status.HTTP_404_NOT_FOUND)
-#     else:
-#         return Response("User yo'q", status.HTTP_404_NOT_FOUND)
 
 
 @main_photos_router.delete(path='-photo', name="Delete Banner photo")
