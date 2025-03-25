@@ -17,7 +17,7 @@ class UserId(BaseModel):
     id: int
 
 
-@main_photos_router.options(path="-photo", name="All banner photos")
+@main_photos_router.get(path="-photo", name="All banner photos")
 async def list_banner_photos():
     try:
         photos = await MainPhoto.all()
@@ -26,6 +26,16 @@ async def list_banner_photos():
         return {"photos": photos}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+@main_photos_router.options("/{full_path:path}")
+async def preflight_handler(full_path: str):
+    headers = {
+        "Access-Control-Allow-Origin": "*",  # Или конкретные домены
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    }
+    return Response(status_code=200, headers=headers)
 
 
 @main_photos_router.get(path='-video', name="All banner videos")
