@@ -4,6 +4,7 @@ from fastapi import FastAPI, Response
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
+from starlette.requests import Request
 
 from config import conf
 from fast_routers import shop_product_router, shop_category_router, main_photos_router, work_router, bot_user_router, \
