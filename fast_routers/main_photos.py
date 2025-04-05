@@ -28,8 +28,6 @@ async def list_banner_photos():
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-
-
 @main_photos_router.get(path='-video', name="All banner videos")
 async def list_category_shop():
     photos = await MainVideo.all()

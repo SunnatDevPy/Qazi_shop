@@ -67,10 +67,21 @@ app.add_middleware(
 
 
 @app.options("/{full_path:path}")
-async def preflight_handler(full_path: str):
+async def preflight_handler(full_path: str, request: Request):
+    # Получаем запрашиваемый метод из заголовка preflight-запроса
+    req_method = request.headers.get("access-control-request-method")
+
+    # Если запрашиваемый метод известен (GET или POST), добавляем его в список разрешённых,
+    # иначе разрешим стандартный набор методов.
+    if req_method in ["GET", "POST"]:
+        allowed_methods = f"{req_method}, OPTIONS"
+    else:
+        allowed_methods = "GET, POST, PUT, DELETE, OPTIONS"
+
     headers = {
-        "Access-Control-Allow-Origin": "*",  # Или конкретные домены
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Origin": "*",  # Или укажите конкретные домены
+        "Access-Control-Allow-Methods": allowed_methods,
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
     }
+
     return Response(status_code=200, headers=headers)
